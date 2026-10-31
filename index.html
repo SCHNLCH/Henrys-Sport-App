@@ -254,7 +254,27 @@ const LEAGUES=[
   {id:'4334',name:'Ligue 1',short:'Ligue 1',sport:'football',c:'fr'},
   {id:'4328',name:'Premier League',short:'Premier League',sport:'football',c:'gb'},
   {id:'4332',name:'Serie A',short:'Serie A',sport:'football',c:'it'},
-  {id:'4391',name:'NFL',short:'NFL',sport:'american',c:'us'}
+  {id:'4391',name:'NFL',short:'NFL',sport:'american',c:'us'},
+  {id:'ss-hb-dhbp',name:'DHB-Pokal Männer',short:'DHB-Pokal',sport:'handball',c:'de'},
+  {id:'ss-hb-dhbpf',name:'DHB-Pokal Frauen',short:'DHB-Pokal F',sport:'handball',c:'de'},
+  {id:'ss-hb-cl',name:'EHF Champions League Männer',short:'EHF CL',sport:'handball',c:'eu'},
+  {id:'ss-hb-clf',name:'EHF Champions League Frauen',short:'EHF CL F',sport:'handball',c:'eu'},
+  {id:'ss-hb-el',name:'EHF European League Männer',short:'EHF EL',sport:'handball',c:'eu'},
+  {id:'ss-hb-elf',name:'EHF European League Frauen',short:'EHF EL F',sport:'handball',c:'eu'},
+  {id:'ss-hb-ecf',name:'EHF European Cup Frauen',short:'EHF EC F',sport:'handball',c:'eu'},
+  {id:'ss-hb-em',name:'Handball-Europameisterschaft',short:'Handball-EM',sport:'handball',c:'eu'},
+  {id:'ss-hb-wm',name:'Handball-Weltmeisterschaft',short:'Handball-WM',sport:'handball',c:'eu'},
+  {id:'ss-hb-wmq',name:'Handball WM-Qualifikation Europa',short:'WM-Quali',sport:'handball',c:'eu'},
+  {id:'ss-hb-emq',name:'Handball EM-Qualifikation',short:'EM-Quali',sport:'handball',c:'eu'},
+  {id:'ss-fb-3l',name:'3. Liga',short:'3. Liga',sport:'football',c:'de'},
+  {id:'ss-fb-bl2f',name:'2. Bundesliga Frauen',short:'2. BL F',sport:'football',c:'de'},
+  {id:'ss-fb-dfb',name:'DFB-Pokal',short:'DFB-Pokal',sport:'football',c:'de'},
+  {id:'ss-fb-cl',name:'UEFA Champions League',short:'CL',sport:'football',c:'eu'},
+  {id:'ss-fb-el',name:'UEFA Europa League',short:'EL',sport:'football',c:'eu'},
+  {id:'ss-fb-nl',name:'UEFA Nations League A',short:'Nations L.',sport:'football',c:'eu'},
+  {id:'ss-fb-wmq',name:'Fußball WM-Qualifikation Europa',short:'WM-Quali',sport:'football',c:'eu'},
+  {id:'ss-fb-emq',name:'Fußball EM-Qualifikation',short:'EM-Quali',sport:'football',c:'eu'},
+  {id:'ss-am-efa',name:'European Football Alliance',short:'EFA',sport:'american',c:'eu'}
 ];
 const COUNTRIES=[
   {id:'de',name:'Deutschland',en:'Germany'},{id:'es',name:'Spanien',en:'Spain'},
@@ -586,6 +606,86 @@ async function ahTable(lid){
 }
 const extTable=lid=>extFor(lid)==='fd'?fdTable(lid):ahTable(lid);
 const extMatches=lid=>extFor(lid)==='fd'?fdMatches(lid):ahMatches();
+/* ---------- Sportschau (ARD): Ergebnisse direkt von sportschau.de ---------- */
+const SS_BASE='https://www.sportschau.de/live-und-ergebnisse/';
+const SS={
+  '4533':'handball/deutschland-hbl',
+  'ss-hb-dhbp':'handball/deutschland-dhb-pokal',
+  'ss-hb-dhbpf':'handball/deutschland-dhb-pokal-frauen',
+  'ss-hb-cl':'handball/ehf-champions-league',
+  'ss-hb-clf':'handball/ehf-champions-league-frauen',
+  'ss-hb-el':'handball/ehf-european-league',
+  'ss-hb-elf':'handball/ehf-european-league-frauen',
+  'ss-hb-ecf':'handball/ehf-european-cup-frauen',
+  'ss-hb-em':'handball/ehf-em',
+  'ss-hb-wm':'handball/ihf-wm',
+  'ss-hb-wmq':'handball/ihf-wm-quali-europa',
+  'ss-hb-emq':'handball/ehf-em-quali',
+  'ss-fb-3l':'fussball/deutschland-3-liga',
+  'ss-fb-dfb':'fussball/deutschland-dfb-pokal',
+  'ss-fb-cl':'fussball/uefa-champions-league',
+  'ss-fb-el':'fussball/uefa-europa-league',
+  'ss-fb-nl':'fussball/uefa-nations-league-a',
+  'ss-fb-wmq':'fussball/fifa-wm-quali-europa',
+  'ss-fb-emq':'fussball/em-quali',
+  'ss-fb-bl2f':'fussball/frauen-2-bundesliga',
+  'ss-am-efa':'football/co20066'
+};
+const ssMem={};
+async function ssPage(path){
+  const k=SS_BASE+path,hit=ssMem[k];
+  if(hit&&Date.now()-hit.t<120e3)return hit.h;
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000),t0=performance.now();
+  try{
+    const res=await fetch(k,{signal:ctl.signal});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const h=await res.text();
+    ssMem[k]={t:Date.now(),h};
+    try{logNet('Sportschau · '+path,true,Math.round(performance.now()-t0),'')}catch(e){}
+    return h;
+  }catch(e){
+    try{logNet('Sportschau · '+path,false,Math.round(performance.now()-t0),String(e&&e.message||e))}catch(x){}
+    if(hit)return hit.h;
+    throw e;
+  }finally{clearTimeout(to)}
+}
+function ssParse(h,lid,slug){
+  const d=new DOMParser().parseFromString(h,'text/html');
+  const q=(e,s)=>{const x=e.querySelector(s);return x?x.textContent.trim():''};
+  const lg=(LEAGUES.find(x=>x.id===lid)||{}).name||'';
+  const title=(d.querySelector('title')||{}).textContent||'';
+  const rd=+((title.match(/(\d+)\.\s*Spieltag/)||[])[1])||null;
+  const out=[],seen={};
+  d.querySelectorAll('li[data-match_id]').forEach(e=>{
+    const id=e.getAttribute('data-match_id');
+    const hn=q(e,'.team-name-home'),an=q(e,'.team-name-away');
+    if(!id||seen[id]||!hn||!an)return;
+    const cls=e.className,fin=/\bfinished\b/.test(cls),up=/\bupcoming\b/.test(cls);
+    const live=!fin&&!up&&/live|running|halftime|pause|progress/i.test(cls);
+    if(!fin&&!up&&!live)return;
+    seen[id]=1;
+    const a=parseInt(q(e,'.match-result-home .match-result-0'),10),b=parseInt(q(e,'.match-result-away .match-result-0'),10);
+    const has=!isNaN(a)&&!isNaN(b);
+    const img=s=>{const i=e.querySelector(s+' img');return i?(i.getAttribute('src')||''):''};
+    out.push({id:'ss'+id,hn,an,hid:'ss:'+slug+':'+norm(hn),aid:'ss:'+slug+':'+norm(an),hb:img('.team-image-home'),ab:img('.team-image-away'),
+      hs:fin&&has?a:null,as:fin&&has?b:null,lhs:live&&has?a:null,las:live&&has?b:null,live,t:e.getAttribute('data-datetime')||'',rd,lg});
+  });
+  return out;
+}
+async function ssMatches(lid){
+  const slug=SS[lid],h=await ssPage(slug+'/spiele-und-ergebnisse');
+  let ms=ssParse(h,lid,slug);
+  const cur=(ms[0]&&ms[0].rd)||0;
+  if(cur){
+    const links=[...new DOMParser().parseFromString(h,'text/html').querySelectorAll('a[href*="/spieltag/md"]')].map(a=>a.getAttribute('href').split('?')[0]);
+    const find=n=>links.find(l=>new RegExp('/spieltag/md'+n+'/').test(l));
+    for(const l of [find(cur-1),find(cur+1)].filter(Boolean)){
+      try{ms=ms.concat(ssParse(await ssPage(l.replace(/^(https?:\/\/www\.sportschau\.de)?\/live-und-ergebnisse\//,'')),lid,slug))}catch(e){}
+    }
+  }
+  const seen={};
+  return ms.filter(m=>!seen[m.id]&&(seen[m.id]=1));
+}
 async function getTable(lid,sport){
   if(OL[lid]){try{if(await olUsable(lid)){const t=await olTable(lid);if(t.length)return t}}catch(e){}}
   if(extFor(lid)){try{const t=await extTable(lid);if(t.length)return t}catch(e){}}
@@ -594,6 +694,7 @@ async function getTable(lid,sport){
   return ((j&&j.table)||[]).map(r=>({...r,strTeam:tn(r.strTeam)}));
 }
 async function getLeagueEvents(lid,kind){
+  if(SS[lid]){try{const ms=await ssMatches(lid);if(ms.length)return olPick(ms,kind,15,lid).map(nev)}catch(e){}}
   if(OL[lid]){try{if(await olUsable(lid)){const r=olPick(await olMatches(OL[lid]),kind,15,lid).map(nev);if(r.length||lid==='bl2')return r}}catch(e){}}
   if(extFor(lid)){try{const r=olPick(await extMatches(lid),kind,15,lid).map(nev);if(r.length)return r}catch(e){}}
   if(lid==='bl2')return [];
@@ -606,6 +707,7 @@ async function getTeamEvents(tid,kind){
 }
 /* Spiele eines Vereins (kind: 'last' | 'next'); Bundesliga-Vereine kommen aus den Saisondaten von OpenLigaDB */
 async function getClubEvents(c,kind){
+  if(SS[c.lid]){try{const ms=await ssMatches(c.lid),nm=norm(c.name);const mine=ms.filter(m=>m.hid===c.id||m.aid===c.id||norm(tn(m.hn))===nm||norm(tn(m.an))===nm);if(mine.length)return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev)}catch(e){}}
   if(OL[c.lid]){
     try{
       if(!(await olUsable(c.lid)))throw new Error('veraltet');
