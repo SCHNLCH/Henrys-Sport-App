@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#4f8cff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Henrys Ergebnisse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f6ff; --card:#fff; --text:#1f2a55; --muted:#7480a8; --line:#e9eefb;
+  --acc:#ff5a5f; --acc2:#ff9a9e; --acc-soft:#ffe7e8; --emoji:'⚽';
+  --heart:#ff3d7f; --ok:#12b76a; --bad:#f04438; --draw:#98a2b3;
+  --shadow:0 6px 18px rgba(60,70,140,.10);
+  --font:'Fredoka','Nunito','Baloo 2',ui-rounded,'SF Pro Rounded',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --num:'Fredoka',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+.device[data-tab=statistik]{--acc:#7c4dff;--acc2:#b388ff;--acc-soft:#efe9ff;--emoji:'📊'}
+.device[data-tab=sportart]{--acc:#ff8a00;--acc2:#ffc04d;--acc-soft:#fff1de;--emoji:'🏅'}
+.device[data-tab=land]{--acc:#00b8a9;--acc2:#5eead4;--acc-soft:#dcfbf6;--emoji:'🌍'}
+.device[data-tab=verein]{--acc:#2f80ff;--acc2:#74b0ff;--acc-soft:#e3efff;--emoji:'🛡️'}
+.device[data-tab=tabelle]{--acc:#16b364;--acc2:#7be0a5;--acc-soft:#e0f8e9;--emoji:'🏆'}
+.device[data-tab=favoriten]{--acc:#ff3d7f;--acc2:#ff8fb5;--acc-soft:#ffe4ee;--emoji:'💖'}
+.device[data-tab=liga]{--acc:#ff5a5f;--acc2:#ff9a9e;--acc-soft:#ffe7e8;--emoji:'⚽'}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:var(--font);font-size:17px;color:var(--text);background:#dfe6f7;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.device{position:relative;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+@media (min-width:560px){
+  body{display:grid;place-items:center}
+  .device{width:412px;height:min(892px,96vh);border-radius:40px;border:10px solid #1d2433;box-shadow:0 18px 50px rgba(20,30,60,.35)}
+}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* Kopf */
+.topbar{flex:none;display:flex;align-items:center;gap:10px;padding:14px 14px 18px;color:#fff;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:0 0 32px 32px;box-shadow:0 10px 26px rgba(40,50,110,.18);transition:background .25s}
+.ticon{width:48px;height:48px;border-radius:16px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 4px 10px rgba(0,0,0,.12);transform:rotate(-5deg)}
+.ticon svg{width:30px;height:30px;fill:none;stroke:var(--acc);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.topbar h1{flex:1;margin:0;font-size:29px;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 6px rgba(0,0,0,.14)}
+.chip{border:0;background:rgba(255,255,255,.24);color:#fff;border-radius:20px;padding:5px 12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;min-height:38px;white-space:nowrap}
+.chip i{width:11px;height:11px;border-radius:50%;background:#cfd6ee;display:inline-block;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.chip.live i{background:#4ade80}.chip.demo i{background:#ffb020}.chip.off i{background:#ff6b6b}
+.iconbtn{width:46px;height:46px;border:0;background:rgba(255,255,255,.24);border-radius:50%;display:grid;place-items:center;padding:0;flex:none}
+.iconbtn svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn.spin svg{animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* Inhalt */
+.panel{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 14px 118px}
+.hint{position:relative;margin:0 0 14px;padding:14px 14px 14px 66px;background:var(--acc-soft);border-radius:24px;font-size:17px;line-height:1.35;min-height:64px;display:flex;align-items:center}
+.hint::before{content:var(--emoji);position:absolute;left:14px;top:50%;transform:translateY(-50%) rotate(-6deg);font-size:34px;width:42px;text-align:center}
+h2{font-size:21px;font-weight:600;margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+h2:first-child{margin-top:4px}
+h2::before{content:"";width:7px;height:22px;border-radius:5px;background:var(--acc);flex:none}
+small,.small{font-size:14px;color:var(--muted)}
+.empty{padding:22px 10px;text-align:center;line-height:1.4;background:#fff;border-radius:24px;box-shadow:var(--shadow)}
+.empty .big{font-size:46px;display:block;margin-bottom:6px}
+.card{background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:4px 10px;margin:0 0 12px}
+
+/* Zeilen als Karten */
+.row{display:flex;align-items:center;gap:12px;min-height:62px;padding:6px 6px 6px 14px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);margin:0 0 10px;cursor:pointer;transition:transform .12s}
+.row:active{transform:scale(.97)}
+.row .grow{flex:1;min-width:0;line-height:1.15;overflow-wrap:anywhere;font-weight:500;font-size:18px}
+.row .grow small{display:block;font-weight:400}
+.chk{flex:none;width:32px;height:32px;border:3px solid #cdd5f0;border-radius:50%;display:grid;place-items:center;background:#fff;transition:all .15s}
+.chk.on{background:var(--acc);border-color:var(--acc)}
+.chk.on::after{content:"";width:14px;height:8px;border-left:3.5px solid #fff;border-bottom:3.5px solid #fff;transform:rotate(-45deg) translate(1px,-2px)}
+.heart{flex:none;width:52px;height:52px;border:0;background:none;display:grid;place-items:center;padding:0}
+.heart svg{width:32px;height:32px;fill:none;stroke:#b7c0dc;stroke-width:3;stroke-linejoin:round;transition:transform .15s}
+.heart svg.on{fill:var(--heart);stroke:var(--heart);animation:pop .3s}
+.heart:active svg{transform:scale(.8)}
+@keyframes pop{50%{transform:scale(1.35)}}
+.flag{width:38px;height:26px;border-radius:6px;flex:none;box-shadow:0 2px 5px rgba(0,0,0,.18)}
+.sico{width:40px;height:40px;flex:none;background:var(--acc-soft);border-radius:14px;display:grid;place-items:center}
+.sico svg{width:28px;height:28px;fill:none;stroke:var(--acc);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.reset{display:inline-flex;align-items:center;gap:10px;margin-top:6px;min-height:52px;padding:6px 20px 6px 12px;background:var(--acc-soft);border:0;border-radius:30px;font-size:17px;font-weight:600;color:var(--acc)}
+.reset i{width:28px;height:28px;border-radius:50%;background:var(--acc);position:relative;flex:none}
+.reset i::after{content:"";position:absolute;left:7px;right:7px;top:12.5px;height:3px;border-radius:2px;background:#fff}
+.reset:active{transform:scale(.96)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:6px 24px;color:#fff;font-weight:600;font-size:18px;border:0;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:30px;box-shadow:0 8px 18px rgba(40,50,110,.2)}
+.btn:active{transform:scale(.96)}
+.search{width:100%;min-height:54px;border:3px solid transparent;border-radius:30px;padding:6px 20px;background:#fff;box-shadow:var(--shadow);margin:0 0 12px;outline:none;font-size:18px}
+.search:focus{border-color:var(--acc)}
+.filter{font-size:15px;background:#fff;border-radius:18px;padding:10px 14px;margin:0 0 12px;line-height:1.4;box-shadow:var(--shadow)}
+.filter a{color:var(--acc);font-weight:600;text-decoration:underline;cursor:pointer}
+
+/* Chips & Umschalter */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.cp{flex:none;min-height:46px;padding:4px 20px;border:0;background:#fff;box-shadow:var(--shadow);border-radius:24px;font-size:18px;font-weight:500;white-space:nowrap}
+.cp.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-weight:600}
+.seg{display:flex;gap:4px;margin:0 0 12px;background:#fff;border-radius:26px;padding:4px;box-shadow:var(--shadow)}
+.seg button{flex:1;min-height:44px;border:0;background:transparent;border-radius:22px;font-size:16px;font-weight:500;padding:2px 4px}
+.seg button.on{background:var(--acc);color:#fff;font-weight:600}
+
+/* Tabelle */
+.trow{display:grid;grid-template-columns:28px 32px 1fr 30px 42px 42px;gap:6px;align-items:center;min-height:56px;border-bottom:1.5px solid var(--line);font-family:var(--num);font-size:15px;cursor:pointer}
+.trow:last-child{border-bottom:0}
+.trow.head{min-height:36px;font-size:13px;color:var(--muted);cursor:default}
+.trow .nm{font-family:var(--font);font-size:17px;font-weight:500;line-height:1.1;overflow-wrap:anywhere;display:flex;align-items:center;gap:4px}
+.trow .nm svg{width:15px;height:15px;fill:var(--heart);stroke:var(--heart);stroke-width:3;flex:none}
+.trow .rk{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f0f3fc;font-size:13px;font-weight:600}
+.trow.p1 .rk{background:#ffd54a;color:#7a5200}.trow.p2 .rk{background:#dde2ec;color:#475066}.trow.p3 .rk{background:#f6bd94;color:#6b3a14}
+.num{text-align:center}
+.pts{text-align:center;font-weight:700;font-size:16px;background:var(--acc-soft);color:var(--acc);border-radius:12px;padding:4px 0}
+.bdg{width:32px;height:32px;object-fit:contain;flex:none;border-radius:50%}
+.bdg.ini{display:grid;place-items:center;font:600 12px var(--num);color:#fff;background:hsl(var(--h),62%,52%)}
+.bdg.big{width:50px;height:50px;font-size:17px}
+
+/* Spielkarten */
+.ev{display:grid;grid-template-columns:1fr auto;column-gap:12px;background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:10px 14px 10px 12px;margin:0 0 12px}
+.ev .evd{grid-column:1/-1;font-size:13px;color:var(--acc);font-weight:600;margin-bottom:4px}
+.ev .tms{display:flex;flex-direction:column;min-width:0}
+.tm{display:flex;align-items:center;gap:10px;min-height:40px;line-height:1.1;font-size:18px;overflow-wrap:anywhere;min-width:0}
+.tm.w span{font-weight:700}
+.ev .scs{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:50px;background:var(--acc-soft);border-radius:16px;padding:0 10px}
+.sc{font-family:var(--num);font-weight:700;font-size:24px;height:40px;line-height:40px;text-align:center;color:var(--acc)}
+.sc.l{font-weight:500;color:var(--muted)}
+.sc.t{font-size:18px;height:auto;line-height:1.2;white-space:nowrap;padding:8px 0}
+
+/* Statistik */
+.stc{background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:6px 10px 12px;margin:0 0 12px}
+.stc .top{display:flex;align-items:center;gap:2px;min-height:50px}
+.stc .nm{flex:1;min-width:0;font-size:19px;font-weight:600;line-height:1.1;overflow-wrap:anywhere}
+.stc .heart{width:42px;height:46px}.stc .heart svg{width:28px;height:28px}
+.stg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-family:var(--num);text-align:center}
+.stg div{border-radius:16px;padding:7px 0 5px}
+.stg div:nth-child(1){background:#e8f0ff;color:#2f6fe0}.stg div:nth-child(2){background:#e0f8e9;color:#10914e}
+.stg div:nth-child(3){background:#fff1d6;color:#c77700}.stg div:nth-child(4){background:#f0e8ff;color:#6f3ee0}
+.stg div:nth-child(5){background:#ffe6e8;color:#d63a47}
+.stg b{display:block;font-size:21px;font-weight:700}
+.stg small{font-size:12px;color:inherit;opacity:.8}
+.dots{display:flex;gap:4px;justify-content:flex-end}
+.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;font-family:var(--num)}
+.dot.W{background:var(--ok)}.dot.D{background:var(--draw)}.dot.L{background:var(--bad)}
+.gh{display:flex;align-items:baseline;gap:8px;font-size:19px;font-weight:600;margin:16px 4px 8px;color:var(--text)}
+.gh small{font-size:13px;font-weight:500;color:var(--acc);background:var(--acc-soft);border-radius:10px;padding:1px 8px}
+.legend{font-size:14px;color:var(--muted);line-height:1.4;margin:12px 4px 0}
+
+/* Favoriten */
+.favgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fav{display:flex;align-items:center;min-height:68px;background:#fff;border-radius:22px;box-shadow:var(--shadow);cursor:pointer;min-width:0;padding-right:8px}
+.fav:active{transform:scale(.97)}
+.fav .heart{width:46px;height:56px}.fav .heart svg{width:30px;height:30px}
+.fav .t{flex:1;min-width:0;line-height:1.1;font-size:17px;font-weight:600;overflow-wrap:anywhere}
+.fav .t small{display:block;font-size:12px;font-weight:400}
+.count{display:inline-block;font-size:16px;font-weight:600;color:var(--heart);background:var(--acc-soft);border-radius:20px;padding:4px 14px;margin:0 0 12px}
+
+/* Kader-Knopf & Sheet */
+.dock{margin:12px 0 12px;display:flex;align-items:center;gap:10px;z-index:3}
+.ddbtn{position:relative;min-height:54px;min-width:170px;padding:6px 48px 6px 22px;border:0;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:30px;font-size:20px;font-weight:600;text-align:left;box-shadow:0 8px 20px rgba(40,50,110,.28)}
+.ddbtn::after{content:"";position:absolute;right:20px;top:50%;margin-top:-4px;border:8px solid transparent;border-top:10px solid #fff;border-bottom:0}
+.ddbtn:disabled{opacity:.45;box-shadow:none}
+.dock small{background:rgba(255,255,255,.92);border-radius:14px;padding:4px 10px}
+.dd{position:relative;display:inline-block}
+.dd select{appearance:none;-webkit-appearance:none;min-height:50px;min-width:170px;padding:6px 46px 6px 18px;border:0;background:var(--acc-soft);border-radius:26px;font-size:20px;font-weight:600;color:var(--acc)}
+.dd::after{content:"";position:absolute;right:18px;top:50%;margin-top:-4px;border:8px solid transparent;border-top:10px solid var(--acc);border-bottom:0;pointer-events:none}
+.sheet{position:absolute;inset:0;z-index:30;display:none}
+.sheet.open{display:block}
+.sheet .bk{position:absolute;inset:0;background:rgba(20,26,66,.5);backdrop-filter:blur(2px)}
+.sheet .box{position:absolute;left:0;right:0;bottom:0;height:88%;background:var(--bg);border-radius:32px 32px 0 0;display:flex;flex-direction:column;
+  animation:up .25s ease-out;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.sheet .box::before{content:"";width:46px;height:5px;border-radius:3px;background:#c9d2ee;margin:10px auto 0;flex:none}
+@keyframes up{from{transform:translateY(60px);opacity:0}}
+.shead{display:flex;align-items:center;gap:10px;padding:10px 10px 8px 16px}
+.shead .grow{flex:1;min-width:0;line-height:1.1;font-size:22px;font-weight:600}
+.shead .grow small{display:block;font-weight:400}
+.shead .iconbtn{background:#e8edfb}.shead .iconbtn svg{stroke:var(--text)}
+.sbody{flex:1;overflow:auto;padding:4px 14px 30px;-webkit-overflow-scrolling:touch}
+.pl{display:flex;align-items:center;gap:12px;min-height:58px;background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:6px 12px 6px 10px;margin:0 0 8px}
+.pl .no{width:38px;height:38px;border-radius:50%;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center;font:700 16px var(--num);flex:none}
+.pl .grow{flex:1;line-height:1.15;font-weight:500}
+.pl img{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#eef2fb}
+.grp{margin:16px 2px 8px;color:var(--acc);font-size:19px;font-weight:600}
+.keys{background:#f3f6ff;border-radius:16px;padding:12px;margin-bottom:12px;display:grid;gap:8px}.keys label{display:grid;gap:4px;font-weight:600;font-size:14px}.keys label small{font-weight:400;color:#667}.keys input{font:14px var(--num);padding:10px 12px;border-radius:12px;border:1.5px solid #cfd8f3;min-width:0}
+.diag{font:13px/1.35 var(--num);color:#222}
+.diag div{padding:5px 0;border-bottom:1px solid #e3e8f4;word-break:break-all}
+.diag .ok{color:var(--ok)}.diag .no{color:var(--bad)}
+.toast{position:absolute;left:14px;right:14px;bottom:100px;z-index:40;background:#1f2a55;color:#fff;border-radius:24px;padding:12px 16px;display:none;align-items:center;gap:10px;font-size:16px;line-height:1.2;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.toast.show{display:flex}
+.toast button{margin-left:auto;background:#ffd54a;color:#1f2a55;font-weight:600;border:0;border-radius:16px;padding:8px 14px;min-height:40px}
+.load{display:flex;align-items:center;gap:10px;padding:16px 8px;color:var(--muted)}
+.ball{display:inline-block;animation:bounce .7s ease-in-out infinite alternate;font-size:26px}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px) rotate(180deg)}}
+.demobar{background:linear-gradient(135deg,#ff8a00,#ff5a5f);color:#fff;border-radius:22px;padding:12px 16px;font-weight:600;margin:0 0 14px;line-height:1.3;box-shadow:0 8px 20px rgba(255,90,40,.3);cursor:pointer}
+.demobar small{color:#fff;opacity:.9;font-weight:400}
+.livetag{color:#f04438;font-weight:700}
+.banner{background:#fff3d6;border-radius:18px;padding:10px 14px;font-size:15px;line-height:1.35;margin:0 0 12px}
+
+/* Navigation unten */
+.rail{position:absolute;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:2px;background:#fff;border-radius:32px;padding:6px 5px;
+  box-shadow:0 10px 30px rgba(40,50,110,.25)}
+.rail button{flex:1;min-width:0;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:5px 0 4px;border-radius:24px;
+  color:var(--c);font-size:11px;font-weight:500;opacity:.8;transition:all .15s}
+.rail button svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.rail button.on{background:color-mix(in srgb,var(--c) 15%,white);opacity:1;font-weight:700}
+.rail button:active{transform:scale(.92)}
+.rail [data-id=statistik]{--c:#7c4dff}.rail [data-id=sportart]{--c:#ff8a00}.rail [data-id=land]{--c:#00a99b}
+.rail [data-id=verein]{--c:#2f80ff}.rail [data-id=tabelle]{--c:#16b364}.rail [data-id=favoriten]{--c:#ff3d7f}.rail [data-id=liga]{--c:#ff5a5f}
+</style>
+</head>
+<body>
+<div class="device" id="device">
+  <nav class="rail" id="rail" aria-label="Hauptmenü"></nav>
+  <main>
+    <div class="topbar">
+      <span class="ticon" id="ticon"></span>
+      <h1 id="title">Liga</h1>
+      <button class="chip" id="chip" data-act="diag" aria-label="Datenstatus"><i></i><span>…</span></button>
+      <button class="iconbtn" id="refresh" data-act="refresh" aria-label="Neu laden">
+        <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+      </button>
+    </div>
+    <div class="panel" id="panel"></div>
+  </main>
+  <div class="sheet" id="sheet">
+    <div class="bk" data-act="closeSheet"></div>
+    <div class="box" id="sheetBox"></div>
+  </div>
+  <div class="toast" id="toast"><span id="toastMsg"></span></div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Henrys Ergebnisse – Prototyp
+   Datenquelle: TheSportsDB (kostenloser Schlüssel "3"), Fußball + Handball + NFL.
+   Ohne Internet / bei Fehlern schaltet die App auf klar gekennzeichnete DEMO-Daten.
+   Demo erzwingen: Datei mit ?demo=1 öffnen oder im Datenstatus umschalten.
+   ===================================================================== */
+const CONFIG={key:'3',perMin:24,refreshMs:120000,maxFav:9,forceDemo:/[?&]demo=1/.test(location.search)};
+
+/* ---------- Katalog ---------- */
+const SPORTS=[
+  {id:'football',name:'Fußball',api:'Soccer'},
+  {id:'handball',name:'Handball',api:'Handball'},
+  {id:'american',name:'American Football',api:'American Football'}
+];
+const LEAGUES=[
+  {id:'4331',name:'Fußball Bundesliga',short:'FBL',sport:'football',c:'de'},
+  {id:'bl2',name:'2. Bundesliga',short:'2. BL',sport:'football',c:'de'},
+  {id:'4533',name:'Handball Bundesliga',short:'HBL',sport:'handball',c:'de'},
+  {id:'4335',name:'LaLiga',short:'LaLiga',sport:'football',c:'es'},
+  {id:'4334',name:'Ligue 1',short:'Ligue 1',sport:'football',c:'fr'},
+  {id:'4328',name:'Premier League',short:'Premier League',sport:'football',c:'gb'},
+  {id:'4332',name:'Serie A',short:'Serie A',sport:'football',c:'it'},
+  {id:'4391',name:'NFL',short:'NFL',sport:'american',c:'us'}
+];
+const COUNTRIES=[
+  {id:'de',name:'Deutschland',en:'Germany'},{id:'es',name:'Spanien',en:'Spain'},
+  {id:'fr',name:'Frankreich',en:'France'},{id:'nl',name:'Niederlande',en:'Netherlands'},
+  {id:'gb',name:'England',en:'England'},{id:'it',name:'Italien',en:'Italy'},
+  {id:'dk',name:'Dänemark',en:'Denmark'},{id:'se',name:'Schweden',en:'Sweden'},
+  {id:'us',name:'USA',en:'United States'}
+];
+const TABS=[
+  {id:'statistik',name:'Statistik'},{id:'sportart',name:'Sportart'},{id:'land',name:'Land'},
+  {id:'verein',name:'Verein'},{id:'tabelle',name:'Tabelle'},{id:'favoriten',name:'Favoriten'},{id:'liga',name:'Liga'}
+];
+const leagueById=id=>LEAGUES.find(l=>l.id===String(id));
+const countryById=id=>COUNTRIES.find(c=>c.id===id);
+const sportById=id=>SPORTS.find(s=>s.id===id);
+const sportOf=api=>{const s=SPORTS.find(x=>x.api===api);return s?s.id:null};
+
+/* ---------- Icons (handgezeichnet, wie in Henrys Skizzen) ---------- */
+const ICON={
+  statistik:'<svg viewBox="0 0 48 48"><circle cx="11" cy="9" r="4.5"/><path d="M24 38C23 22 33 14 41 19"/><path d="M35 12l7 7-9 2"/><path d="M9 28l10 10M19 28L9 38"/></svg>',
+  sportart:'<svg viewBox="0 0 48 48"><circle cx="13" cy="14" r="8"/><path d="M13 9l4 3-1.5 4.5h-5L9 12z"/><circle cx="35" cy="14" r="8"/><path d="M28 11c5 2 10 2 14 0M28 18c5-2 10-2 14 0"/><ellipse cx="24" cy="37" rx="12" ry="6.5" transform="rotate(-18 24 37)"/><path d="M19 38l10-3.5M22 35.5l1 3M25.5 34.5l1 3"/></svg>',
+  land:'<svg viewBox="0 0 48 48"><path d="M6 11h36v26H6z"/><path d="M6 20h36M6 28h36"/></svg>',
+  verein:'<svg viewBox="0 0 48 48"><path d="M24 5l16 6v12c0 10-7 17-16 20C15 40 8 33 8 23V11z"/><path d="M24 15l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>',
+  tabelle:'<svg viewBox="0 0 48 48"><path d="M7 6h34v36H7z"/><path d="M13 15h5M13 25h5M13 35h5M22 15h14M22 25h14M22 35h14"/></svg>',
+  favoriten:'<svg viewBox="0 0 48 48"><path d="M24 41C8 29 5 22 5 15 5 9 9 6 14 6c4 0 8 2 10 6 2-4 6-6 10-6 5 0 9 3 9 9 0 7-3 14-19 26z"/></svg>',
+  liga:'<svg viewBox="0 0 48 48"><path d="M6 7h36v34H6z"/><path d="M10 16c4-6 8 6 12 0s8 6 12 0 6 2 8 0"/><path d="M10 25c4-6 8 6 12 0s8 6 12 0 6 2 8 0"/><path d="M10 34h28"/></svg>'
+};
+const SICON={
+  football:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M24 15l8 6-3 9H19l-3-9z"/><path d="M24 15V6M32 21l9-3M29 30l6 8M19 30l-6 8M16 21l-9-3"/></svg>',
+  handball:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M7 18c10 4 24 4 34 0M7 30c10-4 24-4 34 0M24 6v36"/></svg>',
+  american:'<svg viewBox="0 0 48 48"><ellipse cx="24" cy="24" rx="20" ry="12" transform="rotate(-30 24 24)"/><path d="M16 28l15-7M19 22l3 5M24 20l3 5M29 18l3 5"/></svg>'
+};
+const heartSVG=on=>`<svg viewBox="0 0 48 48" class="${on?'on':''}"><path d="M24 41C8 29 5 22 5 15 5 9 9 6 14 6c4 0 8 2 10 6 2-4 6-6 10-6 5 0 9 3 9 9 0 7-3 14-19 26z"/></svg>`;
+function flag(id){
+  const f={
+    de:'<rect width="30" height="7" fill="#000"/><rect y="7" width="30" height="6.5" fill="#d00"/><rect y="13.5" width="30" height="6.5" fill="#ffce00"/>',
+    es:'<rect width="30" height="20" fill="#c60b1e"/><rect y="5" width="30" height="10" fill="#ffc400"/>',
+    fr:'<rect width="10" height="20" fill="#0055a4"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ef4135"/>',
+    nl:'<rect width="30" height="7" fill="#ae1c28"/><rect y="7" width="30" height="6.5" fill="#fff"/><rect y="13.5" width="30" height="6.5" fill="#21468b"/>',
+    it:'<rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce2b37"/>',
+    gb:'<rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="#c8102e" stroke-width="1.6"/><path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="6"/><path d="M15 0V20M0 10H30" stroke="#c8102e" stroke-width="3.4"/>',
+    dk:'<rect width="30" height="20" fill="#c8102e"/><path d="M10.5 0V20M0 10H30" stroke="#fff" stroke-width="3"/>',
+    se:'<rect width="30" height="20" fill="#006aa7"/><path d="M10.5 0V20M0 10H30" stroke="#fecc00" stroke-width="3.4"/>',
+    us:'<rect width="30" height="20" fill="#fff"/><rect width="30" height="2.85" fill="#b22234"/><rect y="5.7" width="30" height="2.85" fill="#b22234"/><rect y="11.4" width="30" height="2.85" fill="#b22234"/><rect y="17.1" width="30" height="2.85" fill="#b22234"/><rect width="13" height="11" fill="#3c3b6e"/>'
+  }[id]||'<rect width="30" height="20" fill="#ccc"/>';
+  return `<svg class="flag" viewBox="0 0 30 20">${f}</svg>`;
+}
+
+/* ---------- Hilfen ---------- */
+const $=(s,el=document)=>el.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+const toNum=v=>(v===null||v===undefined||v===''||isNaN(+v))?null:+v;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* Deutsche Namen für Daten aus der Quelle (englisch) */
+const TEAM_DE=(()=>{const m={};COUNTRIES.forEach(c=>m[norm(c.en)]=c.name);
+  Object.assign(m,{usa:'USA',unitedstatesofamerica:'USA',holland:'Niederlande',bayernmunich:'FC Bayern München',fcbayernmunich:'FC Bayern München',fcbayernmunchen:'FC Bayern München',
+  cologne:'1. FC Köln',fccologne:'1. FC Köln',fckoln:'1. FC Köln',borussiamonchengladbach:'Borussia Mönchengladbach',fortunadusseldorf:'Fortuna Düsseldorf',greutherfurth:'Greuther Fürth',
+  intermilan:'Inter Mailand',internazionale:'Inter Mailand',acmilan:'AC Mailand',napoli:'SSC Neapel',asroma:'AS Rom',roma:'AS Rom',lazio:'Lazio Rom',marseille:'Olympique Marseille',
+  lyon:'Olympique Lyon',olympiquelyonnais:'Olympique Lyon',nice:'OGC Nizza',ogcnice:'OGC Nizza',rheinneckarlowen:'Rhein-Neckar Löwen',fuchseberlin:'Füchse Berlin',
+  handballsportvereinhamburg:'HSV Hamburg'});return m})();
+const tn=n=>TEAM_DE[norm(n)]||n;
+const LEAGUE_DE={germanbundesliga:'Fußball Bundesliga',german2bundesliga:'2. Bundesliga',spanishlaliga:'LaLiga',laliga:'LaLiga',frenchligue1:'Ligue 1',englishpremierleague:'Premier League',
+  italianseriea:'Serie A',germanhandballbundesliga:'Handball Bundesliga',germanhandballbundesligamen:'Handball Bundesliga',nfl:'NFL',fifaworldcup:'Fußball-Weltmeisterschaft',
+  uefaeuropeanchampionship:'Fußball-Europameisterschaft',uefanationsleague:'UEFA Nations League',internationalfriendlies:'Freundschaftsspiel',uefachampionsleague:'Champions League',
+  europeanmenshandballchampionship:'Handball-Europameisterschaft',ihfworldmenshandballchampionship:'Handball-Weltmeisterschaft',ehfchampionsleague:'EHF Champions League'};
+const lgDE=e=>{const l=leagueById(e.idLeague);return l?l.name:(LEAGUE_DE[norm(e.strLeague)]||e.strLeague||'')};
+const NAT_DE=(()=>{const m={};[['Germany','Deutschland'],['Spain','Spanien'],['France','Frankreich'],['Netherlands','Niederlande'],['England','England'],['Italy','Italien'],['Denmark','Dänemark'],['Sweden','Schweden'],
+  ['United States','USA'],['Switzerland','Schweiz'],['Austria','Österreich'],['Belgium','Belgien'],['Portugal','Portugal'],['Brazil','Brasilien'],['Argentina','Argentinien'],['Croatia','Kroatien'],
+  ['Poland','Polen'],['Norway','Norwegen'],['Turkey','Türkei'],['Slovenia','Slowenien'],['Iceland','Island'],['Serbia','Serbien'],['Hungary','Ungarn'],['Czech Republic','Tschechien'],
+  ['Morocco','Marokko'],['Algeria','Algerien'],['Cameroon','Kamerun'],['Ivory Coast','Elfenbeinküste'],['Canada','Kanada'],['Mexico','Mexiko'],['Colombia','Kolumbien'],['Scotland','Schottland'],
+  ['Ireland','Irland'],['Greece','Griechenland'],['Finland','Finnland'],['Russia','Russland'],['Egypt','Ägypten'],['Japan','Japan'],['Ukraine','Ukraine'],['Uruguay','Uruguay'],['Ghana','Ghana'],
+  ['Nigeria','Nigeria'],['Senegal','Senegal'],['Wales','Wales'],['Bosnia and Herzegovina','Bosnien und Herzegowina'],['Montenegro','Montenegro'],['North Macedonia','Nordmazedonien']].forEach(([a,b])=>m[norm(a)]=b);return m})();
+const natDE=n=>NAT_DE[norm(n)]||n;
+function posDE(pos,sport){
+  const k=norm(pos);
+  if(k==='goalkeeper'||k==='keeper')return 'Torwart';
+  if(sport==='handball'){
+    const h={leftwing:'Linksaußen',rightwing:'Rechtsaußen',leftback:'Rückraum links',rightback:'Rückraum rechts',centreback:'Rückraum Mitte',centerback:'Rückraum Mitte',playmaker:'Rückraum Mitte',pivot:'Kreisläufer',lineplayer:'Kreisläufer',circlerunner:'Kreisläufer'};
+    if(h[k])return h[k];
+  }else if(sport==='football'){
+    if(/defen|back|sweeper/.test(k))return 'Abwehr';
+    if(/mid/.test(k))return 'Mittelfeld';
+    if(/forward|attack|strik|wing/.test(k))return 'Sturm';
+  }
+  return pos||'Spieler';
+}
+function season(sport,d=new Date()){const y=d.getFullYear(),a=d.getMonth()>=6?y:y-1;return sport==='american'?String(a):`${a}-${a+1}`}
+const fmtDay=new Intl.DateTimeFormat('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});
+const fmtTime=new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'});
+function hue(n){let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return h}
+function initials(n){
+  const w=String(n||'?').replace(/[0-9.]/g,' ').split(/[\s-]+/).filter(x=>x&&!/^(fc|sc|sv|vfl|vfb|tsv|tbv|hsg|rb|ac|as|og|olympique|real|club|the|de|cf)$/i.test(x));
+  const a=w.length?w:[String(n||'?')];
+  return (a.length>1?a[0][0]+a[1][0]:a[0].slice(0,2)).toUpperCase();
+}
+function badge(url,name,cls=''){
+  const ini=`<span class="bdg ini ${cls}" style="--h:${hue(name)}">${esc(initials(name))}</span>`;
+  if(typeof url==='string'&&/^https:\/\//.test(url))
+    return `<img class="bdg ${cls}" src="${esc(url)}${/thesportsdb\.com/.test(url)?'/tiny':''}" alt="${esc(name)}" loading="lazy" onerror="badgeErr(this)">`;
+  return ini;
+}
+window.badgeErr=function(el){
+  if(!el.dataset.r&&/\/tiny$/.test(el.src)){el.dataset.r='1';el.src=el.src.replace(/\/tiny$/,'');return}
+  const s=document.createElement('span');s.className='bdg ini '+(el.classList.contains('big')?'big':'');
+  s.style.setProperty('--h',hue(el.alt));s.textContent=initials(el.alt);el.replaceWith(s);
+};
+const loading=(t='Lade Ergebnisse …')=>`<div class="load"><span class="ball">⚽</span><span>${t}</span></div>`;
+const emptyBox=(icon,msg,btn)=>`<div class="empty"><span class="big">${icon}</span>${msg}${btn?`<div style="margin-top:14px">${btn}</div>`:''}</div>`;
+const resetBtn=(label,act)=>`<button class="reset" data-act="${act}"><i></i>${label}</button>`;
+
+/* ---------- Zustand ---------- */
+const LS='henry-app-v1';
+const defaults=()=>({tab:'liga',sports:['football','handball'],leagues:['4331','4533'],country:null,favs:[],tableLeague:'4331',tableView:'table',clubView:'squad',club:null,demo:false,keys:{fd:'',ah:''}});
+function loadState(){try{return {...defaults(),...JSON.parse(localStorage.getItem(LS)||'{}')}}catch(e){return defaults()}}
+let S=loadState();
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const ui={q:{liga:'',verein:'',tabelle:''},sheet:null,tok:0,dirty:false,lastTab:null,reload:null,undo:null};
+const REG=new Map();
+const regClub=c=>{REG.set('club:'+c.id,c);return c};
+const isFav=(t,id)=>S.favs.some(f=>f.t===t&&String(f.id)===String(id));
+const demoMode=()=>CONFIG.forceDemo||S.demo;
+
+/* Ligen, die jetzt gelten (Sportart + Land + Auswahl) */
+function poolLeagues(){return LEAGUES.filter(l=>S.sports.includes(l.sport)&&(!S.country||l.c===S.country))}
+function effLeagues(){return poolLeagues().filter(l=>S.leagues.includes(l.id))}
+function noLeagueMsg(){
+  if(S.country){
+    const c=countryById(S.country);
+    if(!LEAGUES.some(l=>l.c===c.id))return `Für ${esc(c.name)} gibt es in der App noch keine Liga.<br><small>Du kannst das Land aber favorisieren und seine Nationalmannschaft verfolgen.</small>`;
+    if(!LEAGUES.some(l=>l.c===c.id&&S.sports.includes(l.sport)))return `In ${esc(c.name)} gibt es keine Liga für deine gewählten Sportarten.<br><small>Ändere die Sportart oder hebe den Filter auf.</small>`;
+    return `In ${esc(c.name)} hast du noch keine Liga ausgewählt.`;
+  }
+  return 'Wähle zuerst mindestens eine Liga aus.';
+}
+function filterNote(always){
+  if(!always&&!S.country)return '';
+  const f=['Sportarten: '+S.sports.map(x=>sportById(x).name).join(', ')+' <a data-act="nav" data-id="sportart">ändern</a>'];
+  if(S.country)f.push('Land: '+esc(countryById(S.country).name)+' <a data-act="clearCountry">Filter aufheben</a>');
+  return `<div class="filter">${f.join('<br>')}</div>`;
+}
+/* Land wählen: Ligen des Landes werden gleich mit ausgewählt */
+function selectCountry(id){
+  S.country=id;
+  if(id){
+    const add=LEAGUES.filter(l=>l.c===id&&S.sports.includes(l.sport)&&!S.leagues.includes(l.id));
+    add.forEach(l=>S.leagues.push(l.id));
+    if(add.length)toast(`Ligen aus ${countryById(id).name} ausgewählt`);
+  }
+  save();
+}
+
+/* ---------- Netzwerk ---------- */
+const net={log:[],okAt:0,demoAt:0,demoCount:0,fail:0,skipUntil:0,stamps:[],bust:0};
+function logNet(path,ok,ms,msg){net.log.unshift({path,ok,ms,msg,t:Date.now()});net.log.length=Math.min(net.log.length,40)}
+async function slot(){
+  for(;;){
+    const now=Date.now();net.stamps=net.stamps.filter(t=>now-t<60000);
+    if(net.stamps.length<CONFIG.perMin){net.stamps.push(now);return}
+    await sleep(600);
+  }
+}
+async function fetchJSON(path,base,opt){
+  if(Date.now()<net.skipUntil)throw new Error('Pause nach Fehlern');
+  await slot();
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),9000),t0=performance.now(),label=(opt&&opt.name?opt.name+' · ':base?'OpenLigaDB · ':'')+path;
+  try{
+    const res=await fetch((base||`https://www.thesportsdb.com/api/v1/json/${CONFIG.key}/`)+path,{signal:ctl.signal,headers:(opt&&opt.h)||undefined});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const j=await res.json();
+    logNet(label,true,Math.round(performance.now()-t0),'');
+    net.okAt=Date.now();net.fail=0;return j;
+  }catch(e){
+    const m=String(e&&e.message||e);
+    logNet(label,false,Math.round(performance.now()-t0),/Failed to fetch|NetworkError|Load failed/i.test(m)?'Keine Verbindung (oder blockiert)':/abort/i.test(m)?'Zeitüberschreitung':/^HTTP /.test(m)?m.replace('HTTP','Fehler'):m);
+    if(++net.fail>=3)net.skipUntil=Date.now()+30000;
+    throw e;
+  }finally{clearTimeout(to)}
+}
+function cget(k){
+  let v=null;try{v=JSON.parse(localStorage.getItem('c:'+k)||'null')}catch(e){}
+  return v;
+}
+function cset(k,d){try{localStorage.setItem('c:'+k,JSON.stringify({t:Date.now(),d}))}catch(e){
+  try{Object.keys(localStorage).filter(x=>x.startsWith('c:')).forEach(x=>localStorage.removeItem(x))}catch(_){}
+}}
+async function data(path,ttl,demoFn){
+  if(demoMode()){net.demoAt=Date.now();net.demoCount++;return demoFn()}
+  const hit=cget(path);
+  const stable=/^(lookup_all_players|searchteams)/.test(path);
+  if(hit&&Date.now()-hit.t<ttl&&(stable||hit.t>net.bust))return hit.d;
+  try{const d=await fetchJSON(path);cset(path,d);return d}
+  catch(e){
+    if(hit)return hit.d;
+    net.demoAt=Date.now();net.demoCount++;return demoFn();
+  }
+}
+
+/* ---------- Daten-Zugriff ---------- */
+/* Bundesliga & 2. Bundesliga: OpenLigaDB (kostenlos, deutsche Namen). Reserve: TheSportsDB. */
+const OL_BASE='https://api.openligadb.de/';
+const OL={'4331':'bl1','bl2':'bl2','4533':'hbl'};
+// Handball (hbl) ist bei OpenLigaDB nur ein Versuch: wird nur genutzt, wenn die Daten frisch sind, sonst TheSportsDB
+async function olUsable(lid){
+  if(lid!=='4533')return true;
+  const ms=await olMatches(OL[lid]);
+  return ms.some(m=>Math.abs((Date.parse(m.t)||0)-Date.now())<45*864e5);
+}
+const olSeason=()=>{const d=new Date();return d.getMonth()>=6?d.getFullYear():d.getFullYear()-1};
+async function olGet(path,ttl){
+  if(demoMode())throw new Error('Beispiel-Modus');
+  const k='OL:'+path,hit=cget(k);
+  if(hit&&Date.now()-hit.t<ttl&&hit.t>net.bust)return hit.d;
+  try{const d=await fetchJSON(path,OL_BASE);cset(k,d);return d}
+  catch(e){if(hit)return hit.d;throw e}
+}
+function olMatch(m){
+  const res=m.matchResults||[];
+  const fin=res.find(r=>r.resultTypeID===2)||res.find(r=>/endergebnis/i.test(r.resultName||''))||(m.matchIsFinished&&res.length?res[res.length-1]:null);
+  const t=m.matchDateTimeUTC||m.matchDateTime||'';
+  const kick=Date.parse(/(Z|[+-]\d\d:?\d\d)$/.test(t)?t:t+'Z');
+  const done=!!m.matchIsFinished&&!!fin;
+  const live=!done&&res.length>0&&kick<=Date.now()&&kick>Date.now()-3.5*3600e3;
+  const cur=live?res[res.length-1]:null;
+  const code=m.leagueShortcut||'bl1';
+  return {id:'ol'+m.matchID,hn:m.team1.teamName,an:m.team2.teamName,hid:`ol:${code}:${m.team1.teamId}`,aid:`ol:${code}:${m.team2.teamId}`,
+    hb:m.team1.teamIconUrl||'',ab:m.team2.teamIconUrl||'',hs:done?fin.pointsTeam1:null,as:done?fin.pointsTeam2:null,
+    lhs:cur?cur.pointsTeam1:null,las:cur?cur.pointsTeam2:null,live,t,rd:m.group&&m.group.groupOrderID,lg:m.leagueName||''};
+}
+async function olMatches(code){
+  const path=`getmatchdata/${code}/${olSeason()}`,k='OLC:'+path,hit=cget(k);
+  if(hit&&Date.now()-hit.t<2*60e3&&hit.t>net.bust)return hit.d;
+  if(demoMode())throw new Error('Beispiel-Modus');
+  try{
+    const raw=await fetchJSON(path,OL_BASE);
+    const d=(Array.isArray(raw)?raw:[]).filter(m=>m&&m.team1&&m.team2).map(olMatch);
+    if(!d.length)throw new Error('leer');
+    cset(k,d);return d;
+  }catch(e){if(hit)return hit.d;throw e}
+}
+const olEv=(m,lid)=>({idEvent:m.id,strHomeTeam:m.hn,strAwayTeam:m.an,idHomeTeam:m.hid,idAwayTeam:m.aid,strHomeTeamBadge:m.hb,strAwayTeamBadge:m.ab,
+  intHomeScore:m.hs,intAwayScore:m.as,lhs:m.lhs,las:m.las,live:m.live,strTimestamp:m.t,strLeague:m.lg,idLeague:lid});
+function olPick(ms,kind,n,lid){
+  const key=m=>Date.parse(m.t)||0;
+  const list=kind==='past'?ms.filter(m=>m.hs!==null).sort((a,b)=>key(b)-key(a)):ms.filter(m=>m.hs===null).sort((a,b)=>key(a)-key(b));
+  return list.slice(0,n).map(m=>olEv(m,lid));
+}
+async function olTable(lid){
+  const code=OL[lid];
+  const [tbl,ms]=await Promise.all([olGet(`getbltable/${code}/${olSeason()}`,5*60e3),olMatches(code).catch(()=>[])]);
+  if(!Array.isArray(tbl)||!tbl.length)throw new Error('leer');
+  const form={};
+  ms.filter(m=>m.hs!==null).sort((a,b)=>(Date.parse(a.t)||0)-(Date.parse(b.t)||0)).forEach(m=>{
+    const r=m.hs>m.as?['W','L']:m.hs<m.as?['L','W']:['D','D'];
+    (form[m.hid]=form[m.hid]||[]).push(r[0]);(form[m.aid]=form[m.aid]||[]).push(r[1]);
+  });
+  return tbl.slice().sort((a,b)=>b.points-a.points||b.goalDiff-a.goalDiff||b.goals-a.goals).map((r,i)=>{
+    const id=`ol:${code}:${r.teamInfoId}`;
+    return {intRank:String(i+1),idTeam:id,strTeam:tn(r.teamName),strBadge:r.teamIconUrl||'',idLeague:lid,strForm:(form[id]||[]).slice(-5).join(''),
+      intPlayed:String(r.matches),intWin:String(r.won),intDraw:String(r.draw),intLoss:String(r.lost),intGoalsFor:String(r.goals),
+      intGoalsAgainst:String(r.opponentGoals),intGoalDifference:String(r.goalDiff),intPoints:String(r.points)};
+  });
+}
+/* ---------- Zusatzquellen mit eigenem Schlüssel (kostenlos anmelden, Schlüssel im Datenstatus eintragen) ---------- */
+/* football-data.org: LaLiga, Ligue 1, Premier League, Serie A.  API-Sports Handball: Handball-Bundesliga */
+const FD_BASE='https://api.football-data.org/v4/',AH_BASE='https://v1.handball.api-sports.io/';
+const FD={'4335':'PD','4334':'FL1','4328':'PL','4332':'SA'};
+const keyOf=n=>String((S.keys||{})[n]||'').trim();
+const extFor=lid=>FD[lid]&&keyOf('fd')?'fd':(lid==='4533'&&keyOf('ah')?'ah':null);
+async function extGet(kind,path,ttl){
+  if(demoMode())throw new Error('Beispiel-Modus');
+  const k='X'+kind+':'+path,hit=cget(k);
+  if(hit&&Date.now()-hit.t<ttl&&hit.t>net.bust)return hit.d;
+  try{
+    const fd=kind==='fd';
+    const d=await fetchJSON(path,fd?FD_BASE:AH_BASE,{name:fd?'football-data':'API-Sports',h:fd?{'X-Auth-Token':keyOf('fd')}:{'x-apisports-key':keyOf('ah')}});
+    if(!fd&&d&&d.errors&&(Array.isArray(d.errors)?d.errors.length:Object.keys(d.errors).length))throw new Error('Schlüssel/Limit: '+JSON.stringify(d.errors).slice(0,80));
+    cset(k,d);return d;
+  }catch(e){if(hit)return hit.d;throw e}
+}
+const fdName=t=>t.shortName||t.name;
+async function fdMatches(lid){
+  const j=await extGet('fd',`competitions/${FD[lid]}/matches`,3*60e3);
+  const ms=((j&&j.matches)||[]).filter(m=>m.homeTeam&&m.awayTeam&&m.homeTeam.id&&m.awayTeam.id);
+  if(!ms.length)throw new Error('leer');
+  return ms.map(m=>{
+    const st=m.status,fin=st==='FINISHED'||st==='AWARDED',live=st==='IN_PLAY'||st==='PAUSED',f=(m.score&&m.score.fullTime)||{};
+    return {id:'fd'+m.id,hn:fdName(m.homeTeam),an:fdName(m.awayTeam),hid:'fd:'+m.homeTeam.id,aid:'fd:'+m.awayTeam.id,hb:m.homeTeam.crest||'',ab:m.awayTeam.crest||'',
+      hs:fin?f.home:null,as:fin?f.away:null,lhs:live?f.home:null,las:live?f.away:null,live,t:m.utcDate,lg:(j.competition&&j.competition.name)||''};
+  });
+}
+async function fdTable(lid){
+  const j=await extGet('fd',`competitions/${FD[lid]}/standings`,5*60e3);
+  const st=(j&&j.standings)||[];
+  const t=((st.find(x=>x.type==='TOTAL')||st[0]||{}).table)||[];
+  if(!t.length)throw new Error('leer');
+  return t.map(r=>({intRank:String(r.position),idTeam:'fd:'+r.team.id,strTeam:tn(fdName(r.team)),strBadge:r.team.crest||'',idLeague:lid,
+    strForm:String(r.form||'').split(',').filter(Boolean).map(x=>x[0]).join(''),intPlayed:String(r.playedGames),intWin:String(r.won),intDraw:String(r.draw),intLoss:String(r.lost),
+    intGoalsFor:String(r.goalsFor),intGoalsAgainst:String(r.goalsAgainst),intGoalDifference:String(r.goalDifference),intPoints:String(r.points)}));
+}
+async function ahLeague(){
+  const j=await extGet('ah','leagues?country=Germany',7*864e5);
+  const L=((j&&j.response)||[]).filter(l=>/bundesliga|hbl/i.test(l.name||'')&&!/2\.|2|3|women|frauen|damen|cup|pokal|super/i.test(l.name||'')&&(!l.type||/league/i.test(l.type)));
+  const l=L[0];if(!l)throw new Error('Liga nicht gefunden');
+  const seasons=(l.seasons||[]).map(x=>+x.season).filter(Boolean);
+  return {id:l.id,season:seasons.length?Math.max(...seasons):olSeason()};
+}
+async function ahMatches(){
+  const L=await ahLeague();
+  const j=await extGet('ah',`games?league=${L.id}&season=${L.season}`,10*60e3);
+  const ms=((j&&j.response)||[]).filter(g=>g.teams&&g.teams.home&&g.teams.away);
+  if(!ms.length)throw new Error('leer');
+  return ms.map(g=>{
+    const sh=(g.status&&g.status.short)||'',fin=/^(FT|AOT|AET|AP|AW|WO)$/.test(sh),live=!fin&&!/^(NS|TBD|CANC|PST|POST|ABD|SUSP|INTR)$/.test(sh)&&!!sh,sc=g.scores||{};
+    return {id:'ah'+g.id,hn:g.teams.home.name,an:g.teams.away.name,hid:'ah:'+g.teams.home.id,aid:'ah:'+g.teams.away.id,hb:g.teams.home.logo||'',ab:g.teams.away.logo||'',
+      hs:fin?sc.home:null,as:fin?sc.away:null,lhs:live?sc.home:null,las:live?sc.away:null,live,t:g.date||'',lg:'Handball-Bundesliga'};
+  });
+}
+async function ahTable(lid){
+  const L=await ahLeague();
+  const j=await extGet('ah',`standings?league=${L.id}&season=${L.season}`,30*60e3);
+  let rows=(j&&j.response)||[];if(Array.isArray(rows[0]))rows=rows[0];
+  if(!rows.length)throw new Error('leer');
+  const n=x=>String((x&&typeof x==='object'?x.total:x)??0);
+  return rows.map((r,i)=>({intRank:String(r.position||i+1),idTeam:'ah:'+r.team.id,strTeam:tn(r.team.name),strBadge:r.team.logo||'',idLeague:lid,strForm:String(r.form||'').slice(-5),
+    intPlayed:n(r.games&&r.games.played),intWin:n(r.games&&r.games.win),intDraw:n(r.games&&r.games.draw),intLoss:n(r.games&&r.games.lose),
+    intGoalsFor:String((r.goals&&r.goals.for)??0),intGoalsAgainst:String((r.goals&&r.goals.against)??0),
+    intGoalDifference:String(((r.goals&&r.goals.for)||0)-((r.goals&&r.goals.against)||0)),intPoints:String(r.points??0)}));
+}
+const extTable=lid=>extFor(lid)==='fd'?fdTable(lid):ahTable(lid);
+const extMatches=lid=>extFor(lid)==='fd'?fdMatches(lid):ahMatches();
+async function getTable(lid,sport){
+  if(OL[lid]){try{if(await olUsable(lid)){const t=await olTable(lid);if(t.length)return t}}catch(e){}}
+  if(extFor(lid)){try{const t=await extTable(lid);if(t.length)return t}catch(e){}}
+  if(lid==='bl2')return [];
+  const j=await data(`lookuptable.php?l=${lid}&s=${season(sport)}`,5*60e3,()=>demoTable(lid));
+  return ((j&&j.table)||[]).map(r=>({...r,strTeam:tn(r.strTeam)}));
+}
+async function getLeagueEvents(lid,kind){
+  if(OL[lid]){try{if(await olUsable(lid)){const r=olPick(await olMatches(OL[lid]),kind,15,lid).map(nev);if(r.length||lid==='bl2')return r}}catch(e){}}
+  if(extFor(lid)){try{const r=olPick(await extMatches(lid),kind,15,lid).map(nev);if(r.length)return r}catch(e){}}
+  if(lid==='bl2')return [];
+  const j=await data(`events${kind}league.php?id=${lid}`,2*60e3,()=>demoLeagueEvents(lid,kind));
+  return ((j&&j.events)||[]).map(nev);
+}
+async function getTeamEvents(tid,kind){
+  const j=await data(`events${kind}.php?id=${tid}`,2*60e3,()=>demoTeamEvents(tid,kind));
+  return ((j&&(j.results||j.events))||[]).map(nev);
+}
+/* Spiele eines Vereins (kind: 'last' | 'next'); Bundesliga-Vereine kommen aus den Saisondaten von OpenLigaDB */
+async function getClubEvents(c,kind){
+  if(OL[c.lid]){
+    try{
+      if(!(await olUsable(c.lid)))throw new Error('veraltet');
+      const ms=await olMatches(OL[c.lid]);
+      const nm=norm(c.name);
+      const mine=ms.filter(m=>m.hid===c.id||m.aid===c.id||norm(tn(m.hn))===nm||norm(tn(m.an))===nm);
+      if(mine.length)return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev);
+    }catch(e){}
+  }
+  if(/^(fd|ah):/.test(String(c.id))){
+    try{
+      const ms=await extMatches(c.lid),nm=norm(c.name);
+      const mine=ms.filter(m=>m.hid===c.id||m.aid===c.id||norm(tn(m.hn))===nm||norm(tn(m.an))===nm);
+      return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev);
+    }catch(e){return []}
+  }
+  if(/^ol:/.test(String(c.id))||c.lid==='bl2')return [];
+  return getTeamEvents(c.id,kind);
+}
+async function getPlayers(tid){
+  const j=await data(`lookup_all_players.php?id=${tid}`,24*3600e3,()=>demoPlayers(tid));
+  return (j&&j.player)||[];
+}
+async function searchTeamsRaw(q){
+  const j=await data(`searchteams.php?t=${encodeURIComponent(q)}`,10*60e3,()=>demoSearch(q));
+  return (j&&j.teams)||[];
+}
+async function searchTeams(q){return (await searchTeamsRaw(q)).map(t=>({...t,strTeam:tn(t.strTeam)}))}
+const SQUAD_ALIAS={fcbayernmunchen:'Bayern Munich',['1fckoln']:'FC Koln',borussiamonchengladbach:'Borussia Monchengladbach',fsvmainz05:'Mainz 05',fsvmainz:'Mainz 05',
+  tsghoffenheim:'Hoffenheim',svwerderbremen:'Werder Bremen',werderbremen:'Werder Bremen',scfreiburg:'Freiburg',fcaugsburg:'Augsburg',fcschalke04:'Schalke 04',schalke04:'Schalke 04',
+  sv07elversberg:'Elversberg',scpaderborn07:'Paderborn',rbleipzig:'RB Leipzig'};
+/* Kader: Vereine mit OpenLigaDB-Nummer werden über den Namen bei TheSportsDB gesucht */
+async function getSquad(c){
+  let tid=c.id;
+  if(!/^\d+$/.test(String(tid))&&!/^d\d/.test(String(tid))){
+    tid=null;
+    const qs=[SQUAD_ALIAS[norm(c.name)]||c.name,String(c.name).replace(/^(1\. )?(FC|SC|SV|TSG|FSV|VfL|VfB|RB|SpVgg)\s+/,'')];
+    for(const q of qs){
+      const r=await searchTeamsRaw(q);
+      const t=r.find(x=>sportOf(x.strSport)===c.sport&&(norm(x.strTeam).includes(norm(q))||norm(q).includes(norm(x.strTeam))));
+      if(t){tid=t.idTeam;break}
+    }
+    if(!tid)return [];
+  }
+  return getPlayers(tid);
+}
+async function nationalTeams(c){
+  const j=await data(`searchteams.php?t=${encodeURIComponent(c.en)}`,24*3600e3,()=>demoNational(c));
+  return ((j&&j.teams)||[]).filter(t=>norm(t.strTeam)===norm(c.en)&&sportOf(t.strSport)&&S.sports.includes(sportOf(t.strSport)));
+}
+function evDate(e){
+  let s=e.strTimestamp||(e.dateEvent?e.dateEvent+'T'+(e.strTime||'00:00:00'):null);
+  if(!s)return null;
+  if(!/(Z|[+-]\d\d:?\d\d)$/i.test(s))s+='Z';
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+function nev(e){
+  const live=!!e.live;
+  const hs=toNum(live?e.lhs:e.intHomeScore),as=toNum(live?e.las:e.intAwayScore);
+  return {id:e.idEvent,home:tn(e.strHomeTeam||'?'),away:tn(e.strAwayTeam||'?'),hid:e.idHomeTeam,aid:e.idAwayTeam,
+    hb:e.strHomeTeamBadge,ab:e.strAwayTeamBadge,hs,as,live,done:!live&&hs!==null&&as!==null,d:evDate(e),
+    hasTime:!!(e.strTime&&e.strTime!=='00:00:00')||!!e.strTimestamp,league:lgDE(e)};
+}
+function evCard(e){
+  const hw=e.done&&e.hs>e.as,aw=e.done&&e.as>e.hs;
+  const day=e.d?fmtDay.format(e.d):'';
+  const tm=e.d&&e.hasTime?fmtTime.format(e.d):'';
+  const scs=e.done||(e.live&&e.hs!==null)?`<div class="sc ${e.live?'':hw?'':'l'}">${e.hs}</div><div class="sc ${e.live?'':aw?'':'l'}">${e.as}</div>`:`<div class="sc t">${tm||'–'}</div>`;
+  return `<div class="ev"><div class="evd">${e.live?'<span class="livetag">● läuft gerade</span> ':''}${esc(day)}${e.league?' · '+esc(e.league):''}</div>
+    <div class="tms"><div class="tm ${hw?'w':''}">${badge(e.hb,e.home)}<span>${esc(e.home)}</span></div>
+    <div class="tm ${aw?'w':''}">${badge(e.ab,e.away)}<span>${esc(e.away)}</span></div></div>
+    <div class="scs">${scs}</div></div>`;
+}
+const fmtDate=new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+function staleBanner(evs){
+  const done=evs.filter(e=>e.done&&e.d);
+  if(!done.length)return '';
+  const newest=Math.max(...done.map(e=>+e.d));
+  return Date.now()-newest>28*864e5?`<div class="banner">⚠️ Die Datenquelle meldet seit dem ${fmtDate.format(new Date(newest))} keine neuen Ergebnisse. Die Zahlen können veraltet sein.</div>`:'';
+}
+const DEMO_BAR=`<div class="demobar" data-act="diag">⚠️ Beispieldaten: Diese Ergebnisse sind ausgedacht und nicht echt!<br><small>Tippe hier, um zu sehen, warum keine echten Daten kommen.</small></div>`;
+const uniqEv=a=>{const m=new Map();a.forEach(e=>m.set(e.id||e.home+e.away+(e.d&&+e.d),e));return [...m.values()]};
+const byDateDesc=(a,b)=>(b.d||0)-(a.d||0);
+const byDateAsc=(a,b)=>(a.d||0)-(b.d||0);
+
+/* =====================================================================
+   DEMO-DATEN (nur wenn keine Live-Verbindung möglich ist)
+   ===================================================================== */
+const DEMO_LEAGUES={
+  '4331':{sport:'football',name:'Fußball Bundesliga',teams:['Borussia Dortmund','FC Bayern München','VfB Stuttgart','Bayer Leverkusen','FC Schalke 04','SV Elversberg','RB Leipzig','SC Freiburg','Werder Bremen','Eintracht Frankfurt']},
+  '4533':{sport:'handball',name:'Handball Bundesliga',teams:['THW Kiel','SG Flensburg-Handewitt','SC Magdeburg','Füchse Berlin','Rhein-Neckar Löwen','MT Melsungen','TBV Lemgo Lippe','HSG Wetzlar','VfL Gummersbach','TSV Hannover-Burgdorf']},
+  '4335':{sport:'football',name:'LaLiga',teams:['FC Barcelona','Real Madrid','Atlético Madrid','Sevilla FC','Valencia CF','Villarreal CF','Real Betis','Athletic Club']},
+  '4334':{sport:'football',name:'Ligue 1',teams:['Paris Saint-Germain','Olympique Marseille','AS Monaco','Olympique Lyon','LOSC Lille','OGC Nizza']},
+  '4328':{sport:'football',name:'Premier League',teams:['Manchester City','Arsenal','Liverpool','Chelsea','Tottenham Hotspur','Manchester United']},
+  '4332':{sport:'football',name:'Serie A',teams:['Inter Mailand','AC Mailand','Juventus','SSC Neapel','AS Rom','Lazio Rom']},
+  '4391':{sport:'american',name:'NFL',teams:['Kansas City Chiefs','Philadelphia Eagles','San Francisco 49ers','Dallas Cowboys','Buffalo Bills','Baltimore Ravens']}
+};
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const DEMO_CACHE={};
+function demoLeague(lid){
+  if(DEMO_CACHE[lid])return DEMO_CACHE[lid];
+  const def=DEMO_LEAGUES[lid];if(!def)return null;
+  const rnd=mulberry32(+lid),n=def.teams.length;
+  const pois=l=>{const L=Math.exp(-l);let k=0,p=1;do{k++;p*=rnd()}while(p>L);return k-1};
+  const teams=def.teams.map((name,i)=>({id:`d${lid}_${i}`,name,i,str:1-0.5*i/n+(rnd()-.5)*0.35}));
+  let arr=[...Array(n).keys()];const rounds=[];
+  for(let r=0;r<n-1;r++){
+    const pairs=[];
+    for(let i=0;i<n/2;i++){let a=arr[i],b=arr[n-1-i];if((r+i)%2)[a,b]=[b,a];pairs.push([a,b])}
+    rounds.push(pairs);arr.splice(1,0,arr.pop());
+  }
+  const all=[...rounds,...rounds.map(rs=>rs.map(([a,b])=>[b,a]))];
+  const played=Math.min(7,all.length-2);
+  const now=new Date(),back=now.getDay()===6?7:(now.getDay()+1)%7;
+  const last=new Date(now);last.setDate(now.getDate()-back);last.setHours(15,30,0,0);
+  const score=(h,a)=>{
+    const d=h.str-a.str;
+    if(def.sport==='football'){const lam=x=>Math.max(.3,Math.min(3.2,1.3+x));return [pois(lam(d*1.2+.2)),pois(lam(-d*1.2))]}
+    if(def.sport==='handball')return [Math.round(29+d*5+(rnd()-.4)*7),Math.round(29-d*5+(rnd()-.5)*7)];
+    return [Math.max(3,Math.round(22+d*10+(rnd()-.5)*18)),Math.max(3,Math.round(22-d*10+(rnd()-.5)*18))];
+  };
+  const events=[];
+  all.forEach((pairs,k)=>pairs.forEach(([a,b],i)=>{
+    const dt=new Date(last);dt.setDate(last.getDate()+7*(k-(played-1)));
+    const iso=dt.toISOString(),done=k<played,[hs,as]=done?score(teams[a],teams[b]):[null,null];
+    events.push({idEvent:`d${lid}_${k}_${i}`,strHomeTeam:teams[a].name,strAwayTeam:teams[b].name,idHomeTeam:teams[a].id,idAwayTeam:teams[b].id,
+      intHomeScore:done?String(hs):null,intAwayScore:done?String(as):null,dateEvent:iso.slice(0,10),strTime:iso.slice(11,19),strTimestamp:iso.slice(0,19),
+      strLeague:def.name,idLeague:lid,intRound:String(k+1),strHomeTeamBadge:'',strAwayTeamBadge:''});
+  }));
+  const st=teams.map(t=>({idTeam:t.id,strTeam:t.name,strBadge:'',idLeague:lid,strLeague:def.name,w:0,d:0,l:0,gf:0,ga:0,form:[]}));
+  events.filter(e=>e.intHomeScore!==null).sort((a,b)=>a.strTimestamp.localeCompare(b.strTimestamp)).forEach(e=>{
+    const h=st.find(x=>x.idTeam===e.idHomeTeam),a=st.find(x=>x.idTeam===e.idAwayTeam),hs=+e.intHomeScore,as=+e.intAwayScore;
+    h.gf+=hs;h.ga+=as;a.gf+=as;a.ga+=hs;
+    if(hs>as){h.w++;a.l++;h.form.push('W');a.form.push('L')}else if(hs<as){a.w++;h.l++;h.form.push('L');a.form.push('W')}else{h.d++;a.d++;h.form.push('D');a.form.push('D')}
+  });
+  const wp=def.sport==='football'?3:def.sport==='handball'?2:1,dp=def.sport==='american'?0:1;
+  const table=st.map(x=>({idTeam:x.idTeam,strTeam:x.strTeam,strBadge:'',idLeague:lid,strLeague:def.name,strForm:x.form.slice(-5).join(''),
+    intPlayed:String(x.w+x.d+x.l),intWin:String(x.w),intDraw:String(x.d),intLoss:String(x.l),intGoalsFor:String(x.gf),intGoalsAgainst:String(x.ga),
+    intGoalDifference:String(x.gf-x.ga),intPoints:String(x.w*wp+x.d*dp)}))
+    .sort((a,b)=>b.intPoints-a.intPoints||b.intGoalDifference-a.intGoalDifference||b.intGoalsFor-a.intGoalsFor)
+    .map((r,i)=>({...r,intRank:String(i+1)}));
+  return DEMO_CACHE[lid]={def,teams,events,table};
+}
+const demoTable=lid=>{const L=demoLeague(lid);return {table:L?L.table:null}};
+function demoLeagueEvents(lid,kind){
+  const L=demoLeague(lid);if(!L)return {events:null};
+  const asc=(a,b)=>a.strTimestamp.localeCompare(b.strTimestamp);
+  const ev=kind==='past'?L.events.filter(e=>e.intHomeScore!==null).sort((a,b)=>asc(b,a)):L.events.filter(e=>e.intHomeScore===null).sort(asc);
+  return {events:ev.slice(0,15)};
+}
+function demoNatEvents(tid,kind){
+  const m=/^dN_(\w+)_(\w+)$/.exec(tid);if(!m)return {events:[]};
+  const c=countryById(m[1]),sport=m[2],opp=COUNTRIES.filter(x=>x.id!==c.id),rnd=mulberry32(hue(tid)+7),evs=[];
+  for(let i=0;i<6;i++){
+    const past=i<3,o=opp[Math.floor(rnd()*opp.length)],dt=new Date();dt.setDate(dt.getDate()+(past?-(3-i)*18-3:(i-2)*18));dt.setHours(20,45,0,0);
+    const iso=dt.toISOString(),home=rnd()>.5,g=()=>sport==='handball'?String(24+Math.floor(rnd()*12)):String(Math.floor(rnd()*4));
+    evs.push({idEvent:`${tid}_${i}`,strHomeTeam:home?c.en:o.en,strAwayTeam:home?o.en:c.en,intHomeScore:past?g():null,intAwayScore:past?g():null,
+      dateEvent:iso.slice(0,10),strTime:iso.slice(11,19),strTimestamp:iso.slice(0,19),strLeague:'Länderspiel (Beispiel)'});
+  }
+  return {events:evs.filter(e=>kind==='last'?e.intHomeScore!==null:e.intHomeScore===null).sort((a,b)=>kind==='last'?b.strTimestamp.localeCompare(a.strTimestamp):a.strTimestamp.localeCompare(b.strTimestamp))};
+}
+function demoTeamEvents(tid,kind){
+  if(/^dN_/.test(tid))return demoNatEvents(tid,kind);
+  const m=/^d(\d+)_(\d+)$/.exec(tid);if(!m)return {events:[]};
+  const L=demoLeague(m[1]);if(!L)return {events:[]};
+  const mine=L.events.filter(e=>e.idHomeTeam===tid||e.idAwayTeam===tid),asc=(a,b)=>a.strTimestamp.localeCompare(b.strTimestamp);
+  const ev=kind==='last'?mine.filter(e=>e.intHomeScore!==null).sort((a,b)=>asc(b,a)).slice(0,5):mine.filter(e=>e.intHomeScore===null).sort(asc).slice(0,5);
+  return {results:ev};
+}
+function demoPlayers(tid){
+  const m=/^d(\d+)_(\d+)$/.exec(tid);if(!m)return {player:[]};
+  const sport=DEMO_LEAGUES[m[1]].sport;if(sport==='american')return {player:[]};
+  const pos=sport==='football'?[['Goalkeeper',2],['Defender',6],['Midfielder',6],['Forward',4]]:[['Goalkeeper',3],['Left Wing',2],['Left Back',2],['Centre Back',2],['Right Back',2],['Right Wing',2],['Pivot',2]];
+  let n=0;const p=[];
+  pos.forEach(([name,c])=>{for(let i=0;i<c;i++){n++;p.push({idPlayer:`${tid}_${n}`,strPlayer:`Beispiel-Spieler ${n}`,strPosition:name,strNumber:String(n),strNationality:'Beispielland'})}});
+  return {player:p};
+}
+function demoSearch(q){
+  const nq=norm(q),teams=[];
+  Object.entries(DEMO_LEAGUES).forEach(([lid,d])=>d.teams.forEach((t,i)=>{
+    if(norm(t).includes(nq))teams.push({idTeam:`d${lid}_${i}`,strTeam:t,strSport:sportById(d.sport).api,strLeague:d.name,idLeague:lid,strBadge:''});
+  }));
+  return {teams};
+}
+function demoNational(c){
+  return {teams:[{idTeam:`dN_${c.id}_football`,strTeam:c.en,strSport:'Soccer',strBadge:''},{idTeam:`dN_${c.id}_handball`,strTeam:c.en,strSport:'Handball',strBadge:''}]};
+}
+
+/* =====================================================================
+   Favoriten
+   ===================================================================== */
+function favObj(t,id){
+  if(t==='league'){const l=leagueById(id);return l&&{t,id:l.id,name:l.name,short:l.short,sport:l.sport}}
+  if(t==='country'){const c=countryById(id);return c&&{t,id:c.id,name:c.name}}
+  return REG.get('club:'+id);
+}
+function toggleFav(t,id){
+  const i=S.favs.findIndex(f=>f.t===t&&String(f.id)===String(id));
+  if(i>=0){const gone=S.favs.splice(i,1)[0];if(gone.t==='club')regClub(gone);toast('Favorit entfernt')}
+  else{
+    if(S.favs.length>=CONFIG.maxFav){toast('Du hast schon 9 Favoriten. Entferne zuerst einen.');return}
+    const o=favObj(t,id);if(!o)return;
+    S.favs.push(o);toast('Zu deinen Favoriten hinzugefügt ♥');
+  }
+  save();syncHearts();
+  if(S.tab==='favoriten')render(true);else ui.dirty=true;
+}
+const favBtn=(t,id)=>`<button class="heart" data-act="fav" data-t="${t}" data-id="${esc(id)}" aria-label="Favorit">${heartSVG(isFav(t,id))}</button>`;
+function syncHearts(){
+  document.querySelectorAll('button.heart[data-t]').forEach(b=>{
+    const svg=b.querySelector('svg');if(svg)svg.classList.toggle('on',isFav(b.dataset.t,b.dataset.id));
+  });
+}
+
+/* =====================================================================
+   Seiten
+   ===================================================================== */
+const slotEl=(box,id)=>box.querySelector('#'+id)||document.getElementById(id);
+
+/* ---- Liga ---- */
+async function pageLiga(box){
+  const load=()=>{
+    const q=norm(ui.q.liga);
+    let list=poolLeagues();if(q)list=list.filter(l=>norm(l.name+l.short).includes(q));
+    const el=slotEl(box,'list');if(!el)return;
+    el.innerHTML=list.length?list.map(l=>`<div class="row" data-act="league" data-id="${l.id}">
+      <span class="chk ${S.leagues.includes(l.id)?'on':''}"></span>${flag(l.c)}<span class="grow">${esc(l.name)}<small>${esc(sportById(l.sport).name)}</small></span>${favBtn('league',l.id)}</div>`).join('')
+      :emptyBox('🔎',q?'Keine Liga gefunden.<br><small>Prüfe die Suche.</small>':noLeagueMsg());
+  };
+  ui.reload=load;
+  box.innerHTML=`<p class="hint">Hier kannst du nach Ligen suchen oder sie favorisieren. Du musst die Ligen auswählen.</p>
+    ${filterNote(true)}
+    <input class="search" data-q="liga" type="search" placeholder="🔍 Liga suchen …" value="${esc(ui.q.liga)}" autocomplete="off">
+    <div id="list"></div>${resetBtn('Auswahl zurücksetzen','resetLeagues')}`;
+  load();
+}
+
+/* ---- Tabelle ---- */
+async function pageTabelle(box,tok){
+  const ls=effLeagues();
+  if(!ls.length){box.innerHTML=`<p class="hint">Hier wird dir die Tabelle angezeigt nach deiner Suche.</p>`+emptyBox('📋',noLeagueMsg(),`<button class="btn" data-act="nav" data-id="liga">Ligen auswählen</button>`);return}
+  if(!ls.find(l=>l.id===S.tableLeague)){S.tableLeague=ls[0].id;save()}
+  const lg=leagueById(S.tableLeague);
+  box.innerHTML=`<p class="hint">Hier wird dir die Tabelle angezeigt nach deiner Suche.</p>
+    <div class="chips">${ls.map(l=>`<button class="cp ${l.id===S.tableLeague?'on':''}" data-act="tl" data-id="${l.id}">${esc(l.short)}</button>`).join('')}</div>
+    <div class="seg">${[['table','Tabelle'],['results','Ergebnisse'],['next','Spielplan']].map(([v,n])=>`<button class="${S.tableView===v?'on':''}" data-act="tv" data-id="${v}">${n}</button>`).join('')}</div>
+    ${S.tableView==='table'?`<input class="search" data-q="tabelle" type="search" placeholder="🔍 Verein suchen …" value="${esc(ui.q.tabelle)}" autocomplete="off">`:''}
+    <div id="tbody">${loading()}</div>
+    ${resetBtn('Suche zurücksetzen','resetTable')}`;
+  const load=async()=>{
+    let html='';
+    try{
+      if(S.tableView==='table'){
+        const rows=await getTable(lg.id,lg.sport);
+        const q=norm(ui.q.tabelle);
+        const shown=rows.filter(r=>!q||norm(r.strTeam).includes(q));
+        if(!rows.length)html=emptyBox('🤷','Für diese Liga gibt es gerade keine Tabelle.<br><small>Die kostenlose Datenquelle hat nicht für jede Saison eine Tabelle.</small>');
+        else if(!shown.length)html=emptyBox('🔎','Kein Verein gefunden.');
+        else html=`<div class="card"><div class="trow head"><span class="num">#</span><span></span><span>Verein</span><span class="num">Sp</span><span class="num">Diff</span><span class="num">Pkt</span></div>`+
+          shown.map(r=>{
+            const club=regClub({t:'club',id:r.idTeam,name:r.strTeam,badge:r.strBadge,lid:lg.id,sport:lg.sport,league:lg.short});
+            const rk=toNum(r.intRank)||'';const diff=toNum(r.intGoalDifference);
+            const pts=toNum(r.intPoints)??toNum(r.intWin)??'–';
+            return `<div class="trow p${rk}" data-act="club" data-id="${esc(club.id)}"><span class="rk">${rk}</span>${badge(r.strBadge,r.strTeam)}
+              <span class="nm">${esc(r.strTeam)}${isFav('club',club.id)?heartSVG(true):''}</span><span class="num">${esc(r.intPlayed??'–')}</span>
+              <span class="num">${diff===null?'–':(diff>0?'+':'')+diff}</span><span class="pts">${pts}</span></div>`}).join('')+'</div>';
+      }else{
+        const evs=(await getLeagueEvents(lg.id,S.tableView==='results'?'past':'next')).sort(S.tableView==='results'?byDateDesc:byDateAsc);
+        html=(S.tableView==='results'?staleBanner(evs):'')+(evs.length?evs.map(evCard).join(''):emptyBox('📅',S.tableView==='results'?'Noch keine Ergebnisse gefunden.':'Noch kein Spielplan gefunden.'));
+      }
+    }catch(e){html=emptyBox('😕','Das hat nicht geklappt.<br><small>Tippe oben auf ↻.</small>')}
+    if(tok!==ui.tok)return;
+    const el=slotEl(box,'tbody');if(el)el.innerHTML=html;
+  };
+  ui.reload=load;
+  await load();
+}
+
+/* ---- Verein ---- */
+async function pageVerein(box,tok){
+  const load=async()=>{
+    const el=slotEl(box,'list');if(!el)return;
+    const qraw=ui.q.verein.trim(),ls=effLeagues();
+    let clubs=[],note='';
+    try{
+      if(qraw.length>=3){
+        const res=await searchTeams(qraw);
+        clubs=res.filter(t=>sportOf(t.strSport)&&S.sports.includes(sportOf(t.strSport))).map(t=>regClub({t:'club',id:t.idTeam,name:t.strTeam,badge:t.strBadge,lid:String(t.idLeague||''),sport:sportOf(t.strSport),league:t.strLeague||''}));
+        note=clubs.length?'':emptyBox('🔎','Keinen Verein gefunden.');
+      }else if(!ls.length){
+        el.innerHTML=emptyBox('🏟️',noLeagueMsg(),`<button class="btn" data-act="nav" data-id="liga">Ligen ansehen</button>`);return;
+      }else{
+        const tabs=await Promise.all(ls.map(async l=>({l,rows:await getTable(l.id,l.sport)})));
+        tabs.forEach(({l,rows})=>rows.forEach(r=>clubs.push(regClub({t:'club',id:r.idTeam,name:r.strTeam,badge:r.strBadge,lid:l.id,sport:l.sport,league:l.short}))));
+        const q=norm(qraw);if(q)clubs=clubs.filter(c=>norm(c.name).includes(q));
+        clubs.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+        note=clubs.length?'':emptyBox('🤷','Keine Vereine gefunden.<br><small>Die Tabelle konnte nicht geladen werden. Tippe oben auf ↻.</small>');
+      }
+    }catch(e){note=emptyBox('😕','Das hat nicht geklappt.')}
+    if(tok!==ui.tok)return;
+    el.innerHTML=clubs.map(c=>`<div class="row" data-act="club" data-id="${esc(c.id)}"><span class="chk ${S.club&&String(S.club.id)===String(c.id)?'on':''}"></span>
+      ${badge(c.badge,c.name)}<span class="grow">${esc(c.name)}<small>${esc(c.league)}</small></span>${favBtn('club',c.id)}</div>`).join('')+note;
+  };
+  ui.reload=load;
+  box.innerHTML=`<p class="hint">Wähle einen Verein aus, um ihn zu favorisieren, den Kader anzuschauen oder Spielergebnisse zu sehen.</p>
+    ${filterNote(false)}
+    <input class="search" data-q="verein" type="search" placeholder="🔍 Verein suchen …" value="${esc(ui.q.verein)}" autocomplete="off">
+    <div class="dock"><button class="ddbtn" data-act="openKader" ${S.club?'':'disabled'}>${{squad:'Kader',results:'Ergebnisse',next:'Nächste Spiele'}[S.clubView]||'Kader'}</button>
+      ${S.club?`<small style="margin-left:8px">${esc(S.club.name)}</small>`:'<small style="margin-left:8px">Wähle erst einen Verein</small>'}</div>
+    <div id="list">${loading('Lade Vereine …')}</div>
+    ${resetBtn('Zurücksetzen','resetClub')}
+`;
+  await load();
+}
+
+/* ---- Land ---- */
+async function pageLand(box,tok){
+  const sel=S.country&&countryById(S.country);
+  box.innerHTML=`<p class="hint">Wähle ein Land aus, um es zu favorisieren oder um nach einem Team zu suchen. Wenn du das Land favorisierst, hast du auch die Nationalmannschaft gespeichert und dir werden Spiele angezeigt.</p>
+    <div>${COUNTRIES.map(c=>`<div class="row" data-act="country" data-id="${c.id}"><span class="chk ${S.country===c.id?'on':''}"></span>${flag(c.id)}<span class="grow">${esc(c.name)}</span>${favBtn('country',c.id)}</div>`).join('')}</div>
+    ${resetBtn('Zurücksetzen','resetCountry')}
+    ${sel?`<h2>${flag(sel.id)} ${esc(sel.name)}</h2>
+      <div class="filter">Du siehst jetzt in <b>Liga</b>, <b>Verein</b> und <b>Tabelle</b> nur noch ${esc(sel.name)}.
+        <br><a data-act="nav" data-id="liga">Ligen ansehen</a> · <a data-act="nav" data-id="verein">Vereine ansehen</a></div>
+      <div id="nat">${loading('Lade Länderspiele …')}</div>`:''}`;
+  if(!sel)return;
+  let html='';
+  try{
+    const teams=await nationalTeams(sel);
+    if(!teams.length)html=emptyBox('🌍','Für dieses Land habe ich keine Nationalmannschaft gefunden.');
+    else{
+      const res=await Promise.all(teams.map(async t=>({t,last:await getTeamEvents(t.idTeam,'last'),next:await getTeamEvents(t.idTeam,'next')})));
+      const last=uniqEv(res.flatMap(r=>r.last)).filter(e=>e.done).sort(byDateDesc).slice(0,4);
+      const next=uniqEv(res.flatMap(r=>r.next)).filter(e=>!e.done).sort(byDateAsc).slice(0,3);
+      html=`<h2>Letzte Spiele</h2>${last.length?last.map(evCard).join(''):'<p class="small">Keine Spiele gefunden.</p>'}
+            <h2>Nächste Spiele</h2>${next.length?next.map(evCard).join(''):'<p class="small">Keine Spiele gefunden.</p>'}`;
+    }
+  }catch(e){html=emptyBox('😕','Das hat nicht geklappt.')}
+  if(tok!==ui.tok)return;
+  const el=slotEl(box,'nat');if(el)el.innerHTML=html;
+}
+
+/* ---- Sportart ---- */
+async function pageSportart(box){
+  box.innerHTML=`<p class="hint">Wähle eine oder mehrere Sportarten aus, um dort nach einem Team oder Kader zu suchen. Du kannst aber auch Teams favorisieren.</p>
+    <div>${SPORTS.map(s=>`<div class="row" data-act="sport" data-id="${s.id}"><span class="chk ${S.sports.includes(s.id)?'on':''}"></span><span class="sico">${SICON[s.id]}</span><span class="grow">${s.name}</span></div>`).join('')}</div>
+    ${resetBtn('Zurücksetzen','resetSports')}`;
+}
+
+/* ---- Favoriten ---- */
+async function pageFav(box){
+  const lab={league:'Liga',club:'Verein',country:'Land'};
+  box.innerHTML=`<p class="hint">Hier werden dir deine Favoriten angezeigt. Du darfst nur 9 favorisieren, und zwar: Länder, Vereine und Ligen. Zum Favorisieren musst du nur auf das Herz daneben klicken.</p>
+    <div class="count">${S.favs.length} von ${CONFIG.maxFav}</div>
+    ${S.favs.length?`<div class="favgrid">${S.favs.map(f=>`<div class="fav" data-act="openFav" data-t="${f.t}" data-id="${esc(f.id)}">${favBtn(f.t,f.id)}
+      <span class="t">${esc(f.t==='league'?(f.short||f.name):f.name)}<small>${lab[f.t]}</small></span></div>`).join('')}</div>`
+    :emptyBox('♡','Noch keine Favoriten.<br><small>Tippe in Liga, Verein oder Land auf ein Herz.</small>',`<button class="btn" data-act="nav" data-id="liga">Ligen ansehen</button>`)}
+    ${resetBtn('Favoriten alle zurücksetzen','resetFavs')}`;
+}
+
+/* ---- Statistik ---- */
+async function pageStat(box,tok){
+  const favs=S.favs;
+  if(!favs.length){
+    box.innerHTML=`<p class="hint">Hier siehst du die Ergebnisse und Zahlen von deinen Favoriten.</p>`+
+      emptyBox('⭐','Du hast noch keine Favoriten.<br><small>Tippe auf ein Herz bei Ligen, Vereinen oder Ländern.</small>',`<button class="btn" data-act="nav" data-id="liga">Favoriten auswählen</button>`);
+    return;
+  }
+  box.innerHTML=`<h2>Letzte Spiele</h2><div id="sres">${loading()}</div>
+    <h2>Nächste Spiele</h2><div id="snxt">${loading('')}</div>
+    <h2>Statistiken von meinen Favoriten</h2><div id="ssts">${loading('Lade Zahlen …')}</div>
+    <p class="legend">Sp = Spiele · P = Punkte · T = Tore · TD = Tordifferenz · GT = Gegentore<br>Kreise rechts: die letzten 3 Spiele (✓ gewonnen, – unentschieden, ✗ verloren)</p>`;
+  const clubs=favs.filter(f=>f.t==='club');
+  const gamesP=(async()=>{
+    const groups=[];
+    await Promise.all(favs.map(async f=>{
+      const g={f,last:[],next:[]};
+      try{
+        if(f.t==='club'){g.last=await getClubEvents(f,'last');g.next=await getClubEvents(f,'next')}
+        else if(f.t==='league'){g.last=await getLeagueEvents(f.id,'past');g.next=await getLeagueEvents(f.id,'next')}
+        else{
+          const c=countryById(f.id);
+          if(c)for(const t of await nationalTeams(c)){g.last.push(...await getTeamEvents(t.idTeam,'last'));g.next.push(...await getTeamEvents(t.idTeam,'next'))}
+        }
+      }catch(e){}
+      groups.push(g);
+    }));
+    groups.sort((a,b)=>favs.indexOf(a.f)-favs.indexOf(b.f));
+    const lab={league:'Liga',club:'Verein',country:'Land'};
+    const lastHtml=groups.map(g=>{
+      const ev=uniqEv(g.last).filter(e=>e.done).sort(byDateDesc).slice(0,3);
+      return ev.length?`<div class="gh">${esc(g.f.t==='league'?(g.f.short||g.f.name):g.f.name)}<small>${lab[g.f.t]}</small></div>`+ev.map(evCard).join(''):'';
+    }).join('');
+    const stale=staleBanner(uniqEv(groups.flatMap(g=>g.last)));
+    const cutoff=Date.now()-3*3600e3;
+    const next=uniqEv(groups.flatMap(g=>g.next)).filter(e=>!e.done&&(!e.d||+e.d>cutoff)).sort(byDateAsc).slice(0,5);
+    if(tok!==ui.tok)return;
+    const a=slotEl(box,'sres'),b=slotEl(box,'snxt');
+    if(a)a.innerHTML=stale+(lastHtml||emptyBox('📭','Keine Ergebnisse gefunden.<br><small>Noch kein Spiel oder die Datenquelle hat nichts geliefert.</small>'));
+    if(b)b.innerHTML=next.length?next.map(evCard).join(''):'<p class="small">Keine kommenden Spiele gefunden.</p>';
+  })();
+  const statsP=(async()=>{
+    let html='';
+    if(!clubs.length)html='<p class="small">Favorisiere Vereine mit dem Herz, dann siehst du hier ihre Zahlen.</p>';
+    else{
+      const rows=await Promise.all(clubs.map(async f=>{
+        let r=null;
+        try{
+          if(f.lid){const t=await getTable(f.lid,f.sport||'football');r=t.find(x=>String(x.idTeam)===String(f.id))||t.find(x=>norm(x.strTeam)===norm(f.name))}
+        }catch(e){}
+        return {f,r};
+      }));
+      html=rows.map(({f,r})=>{
+          const v=k=>r&&r[k]!==undefined&&r[k]!==null&&r[k]!==''?r[k]:'–';
+          const fm=r?String(r.strForm||'').replace(/[^WDL]/gi,'').toUpperCase().slice(-3).split(''):[];
+          const sym={W:'✓',D:'–',L:'✗'};
+          const pts=r?(toNum(r.intPoints)??toNum(r.intWin)??'–'):'–';
+          return `<div class="stc"><div class="top">${favBtn('club',f.id)}<span class="nm">${esc(f.name)}</span>
+            <span class="dots">${fm.map(x=>`<span class="dot ${x}">${sym[x]}</span>`).join('')}</span></div>
+            <div class="stg"><div><b>${v('intPlayed')}</b><small>Sp</small></div><div><b>${pts}</b><small>P</small></div><div><b>${v('intGoalsFor')}</b><small>T</small></div><div><b>${v('intGoalDifference')}</b><small>TD</small></div><div><b>${v('intGoalsAgainst')}</b><small>GT</small></div></div></div>`;
+        }).join('');
+    }
+    if(tok!==ui.tok)return;
+    const el=slotEl(box,'ssts');if(el)el.innerHTML=html;
+  })();
+  await Promise.allSettled([gamesP,statsP]);
+}
+
+const PAGES={statistik:pageStat,sportart:pageSportart,land:pageLand,verein:pageVerein,tabelle:pageTabelle,favoriten:pageFav,liga:pageLiga};
+
+/* =====================================================================
+   Bottom-Sheet (Kader / Datenstatus)
+   ===================================================================== */
+const POS_ORDER=['Torwart','Abwehr','Mittelfeld','Sturm','Linksaußen','Rückraum links','Rückraum Mitte','Rückraum rechts','Rechtsaußen','Kreisläufer'];
+function openSheet(kind){ui.sheet=kind;$('#sheet').classList.add('open');renderSheet()}
+function closeSheet(){
+  ui.sheet=null;$('#sheet').classList.remove('open');
+  if(ui.dirty){ui.dirty=false;render(true)}
+  else if(S.tab==='verein'||S.tab==='tabelle')render(true);
+}
+async function renderSheet(){
+  const box=$('#sheetBox');
+  if(ui.sheet==='club'&&S.club){
+    const c=S.club;
+    box.innerHTML=`<div class="shead">${badge(c.badge,c.name,'big')}<div class="grow">${esc(c.name)}<small>${esc(c.league||'')}</small></div>${favBtn('club',c.id)}
+      <button class="iconbtn" data-act="closeSheet" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div style="padding:0 14px 6px"><label class="dd"><select id="clubView"><option value="squad">Kader</option><option value="results">Ergebnisse</option><option value="next">Nächste Spiele</option></select></label></div>
+      <div class="sbody" id="cbody">${loading()}</div>`;
+    $('#clubView').value=S.clubView;
+    loadClubBody();
+  }else if(ui.sheet==='diag'){
+    const rel=t=>{const s=Math.round((Date.now()-t)/1000);return s<90?`vor ${s}s`:`vor ${Math.round(s/60)} Min`};
+    box.innerHTML=`<div class="shead"><div class="grow">Datenstatus<small>Quelle: TheSportsDB (kostenloser Schlüssel)</small></div>
+      <button class="iconbtn" data-act="closeSheet" aria-label="Schließen"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sbody"><div class="banner">${demoMode()?'<b>Beispiel-Modus ist an.</b> Alle Zahlen sind ausgedacht und nur zum Ausprobieren der App.':(net.okAt?`Letzter erfolgreicher Abruf ${rel(net.okAt)}.`:'Noch kein erfolgreicher Abruf. Ohne Verbindung zeigt die App Beispieldaten.')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="btn" data-act="reloadAll">Alles neu laden</button><button class="btn" data-act="checkSrc">Quellen prüfen</button><button class="btn" data-act="demoToggle">${S.demo?'Beispiel-Modus aus':'Beispiel-Modus an'}</button></div>
+      <div class="keys"><b>Zusatzquellen (optional, kostenlos)</b>
+        <label>football-data.org Schlüssel <small>für LaLiga, Ligue 1, Premier League, Serie A</small><input id="kfd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(keyOf('fd'))}"></label>
+        <label>API-Sports Schlüssel <small>für Handball-Bundesliga</small><input id="kah" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(keyOf('ah'))}"></label>
+        <button class="btn" data-act="saveKeys">Schlüssel speichern</button></div>
+      ${ui.chk?`<div class="diag" style="margin-bottom:12px"><b>Quellen-Test</b>${ui.chk.map(r=>`<div class="${r.ok===true?'ok':r.ok===false?'no':''}">${r.ok===true?'✓':r.ok===false?'✗':'…'} ${esc(r.name)} ${esc(r.msg||'')}</div>`).join('')}</div>`:''}<div class="diag">${net.log.length?net.log.map(l=>`<div class="${l.ok?'ok':'no'}">${l.ok?'✓':'✗'} ${esc(l.path)} · ${l.ms} ms ${esc(l.msg)}</div>`).join(''):'Noch keine Abfragen.'}</div>
+      <p class="small">Automatisch aktualisiert alle ${CONFIG.refreshMs/60000} Minuten, solange die App offen ist.</p></div>`;
+  }
+}
+
+async function checkSources(){
+  const K=CONFIG.key,T=`https://www.thesportsdb.com/api/v1/json/${K}/`,y=new Date().getFullYear(),ys=new Date().getMonth()<6?y-1:y;
+  const list=[
+    ['Bundesliga-Tabelle (OpenLigaDB)',`https://api.openligadb.de/getbltable/bl1/${ys}`,j=>Array.isArray(j)&&j.length>=10],
+    ['Bundesliga-Spiele (OpenLigaDB)',`https://api.openligadb.de/getmatchdata/bl1/${ys}`,j=>Array.isArray(j)&&j.length>100],
+    ['Handball-Bundesliga (OpenLigaDB)',`https://api.openligadb.de/getmatchdata/hbl/${ys}`,j=>Array.isArray(j)&&j.length>20],
+    ['Handball-Bundesliga (TheSportsDB)',T+`lookuptable.php?l=4533&s=${ys}-${ys+1}`,j=>j&&j.table&&j.table.length>5],
+    ['Handball Ergebnisse',T+'eventspastleague.php?id=4533',j=>j&&j.events&&j.events.length>0],
+    ['LaLiga-Tabelle',T+`lookuptable.php?l=4335&s=${ys}-${ys+1}`,j=>j&&j.table&&j.table.length>10],
+    ['Ligue-1-Tabelle',T+`lookuptable.php?l=4334&s=${ys}-${ys+1}`,j=>j&&j.table&&j.table.length>10],
+    ['Premier-League-Tabelle',T+`lookuptable.php?l=4328&s=${ys}-${ys+1}`,j=>j&&j.table&&j.table.length>10],
+    ['Serie-A-Tabelle',T+`lookuptable.php?l=4332&s=${ys}-${ys+1}`,j=>j&&j.table&&j.table.length>10],
+    ...(keyOf('fd')?[['LaLiga (football-data.org)','https://api.football-data.org/v4/competitions/PD/standings',j=>j&&j.standings&&j.standings.length>0,{'X-Auth-Token':keyOf('fd')}]]:[]),
+    ...(keyOf('ah')?[['Handball (API-Sports)','https://v1.handball.api-sports.io/leagues?country=Germany',j=>j&&Array.isArray(j.response)&&j.response.length>0&&!(j.errors&&Object.keys(j.errors).length),{'x-apisports-key':keyOf('ah')}]]:[]),
+    ['Vereinssuche / Kader',T+'searchteams.php?t=Bayern',j=>j&&j.teams&&j.teams.length>0],
+  ];
+  ui.chk=list.map(l=>({name:l[0],ok:null}));renderSheet();
+  for(let i=0;i<list.length;i++){
+    const t0=performance.now();
+    try{
+      const r=await fetch(list[i][1],list[i][3]?{headers:list[i][3]}:undefined);if(!r.ok)throw new Error('Fehler '+r.status);
+      const j=await r.json();const good=!!list[i][2](j);
+      ui.chk[i]={name:list[i][0],ok:good,msg:good?'· Daten da':'· erreichbar, aber leer/kostenpflichtig'};
+    }catch(e){ui.chk[i]={name:list[i][0],ok:false,msg:'· '+(/Failed to fetch|Network|Load failed/i.test(String(e.message||e))?'blockiert/keine Verbindung':String(e.message||e))};}
+    ui.chk[i].msg+=' · '+Math.round(performance.now()-t0)+' ms';
+    if(ui.sheet==='diag')renderSheet();
+  }
+}
+async function loadClubBody(){
+  const c=S.club;if(!c)return;
+  const d0=net.demoCount;
+  const el=$('#cbody');if(!el)return;
+  let html='';
+  try{
+    if(S.clubView==='squad'){
+      const pl=await getSquad(c);
+      if(!pl.length)html=emptyBox('👕','Der Kader ist gerade nicht verfügbar.<br><small>Die kostenlose Datenquelle hat nicht für jeden Verein einen Kader.</small>');
+      else{
+        const g={};pl.forEach(p=>{const k=posDE(p.strPosition,c.sport);(g[k]=g[k]||[]).push(p)});
+        const keys=Object.keys(g).sort((a,b)=>{const x=POS_ORDER.indexOf(a),y=POS_ORDER.indexOf(b);return (x<0?99:x)-(y<0?99:y)});
+        html=(demoMode()||/^d\d/.test(String(c.id))?'<div class="banner">Beispiel: ausgedachte Spielernamen.</div>':'')+keys.map(k=>`<div class="grp">${esc(k)}</div>`+g[k].sort((a,b)=>(toNum(a.strNumber)??999)-(toNum(b.strNumber)??999)).map(p=>`
+          <div class="pl"><span class="no">${esc(p.strNumber||'–')}</span><span class="grow">${esc(p.strPlayer)}${p.strNationality?`<small class="small" style="display:block">${esc(natDE(p.strNationality))}</small>`:''}</span>
+          ${/^https:\/\//.test(p.strThumb||'')?`<img src="${esc(p.strThumb)}/tiny" alt="" loading="lazy" onerror="this.remove()">`:''}</div>`).join('')).join('');
+      }
+    }else{
+      const kind=S.clubView==='results'?'last':'next';
+      let evs=await getClubEvents(c,kind);
+      evs=kind==='last'?evs.filter(e=>e.done).sort(byDateDesc):evs.filter(e=>!e.done).sort(byDateAsc);
+      html=(kind==='last'?staleBanner(evs):'')+(evs.length?evs.map(evCard).join(''):emptyBox('📅',kind==='last'?'Keine Ergebnisse gefunden.':'Keine kommenden Spiele gefunden.'));
+    }
+  }catch(e){html=emptyBox('😕','Das hat nicht geklappt.')}
+  const el2=$('#cbody');if(el2)el2.innerHTML=(net.demoCount>d0?DEMO_BAR:'')+html;
+}
+
+/* =====================================================================
+   Rendern, Navigation, Status
+   ===================================================================== */
+function buildRail(){
+  $('#rail').innerHTML=TABS.map(t=>`<button data-act="nav" data-id="${t.id}" aria-label="${t.name}">${ICON[t.id]}<span>${t.name}</span></button>`).join('');
+}
+function updateRail(){
+  document.querySelectorAll('#rail button').forEach(b=>b.classList.toggle('on',b.dataset.id===S.tab));
+  $('#title').textContent=TABS.find(t=>t.id===S.tab).name;
+  $('#device').dataset.tab=S.tab;$('#ticon').innerHTML=ICON[S.tab];
+}
+function updateChip(){
+  const chip=$('#chip'),now=Date.now();let cls='off',txt='Ohne Netz';
+  if(demoMode()||(net.demoAt&&now-net.demoAt<15*60e3&&net.okAt<net.demoAt)){cls='demo';txt='Beispieldaten'}
+  else if(net.okAt){cls='live';txt='Aktuell · '+fmtTime.format(new Date(net.okAt))}
+  else{cls='';txt='…'}
+  chip.className='chip '+cls;chip.querySelector('span').textContent=txt;
+}
+async function render(quiet=false){
+  const tok=++ui.tok,panel=$('#panel'),d0=net.demoCount;
+  const box=quiet?document.createElement('div'):panel;
+  if(!quiet&&ui.lastTab!==S.tab)panel.scrollTop=0;
+  ui.lastTab=S.tab;updateRail();
+  try{await PAGES[S.tab](box,tok)}
+  catch(e){box.innerHTML=emptyBox('😕','Da ist etwas schiefgelaufen.<br><small>'+esc(e.message||e)+'</small>')}
+  if(tok!==ui.tok)return;
+  if(net.demoCount>d0&&S.tab!=='sportart'&&S.tab!=='favoriten'&&S.tab!=='liga')box.insertAdjacentHTML('afterbegin',DEMO_BAR);
+  if(quiet){const y=panel.scrollTop;panel.replaceChildren(...box.childNodes);panel.scrollTop=y}
+  updateChip();
+}
+function go(tab){S.tab=tab;save();if(ui.sheet){ui.sheet=null;$('#sheet').classList.remove('open')}render()}
+let toastT=null;
+function toast(msg,undo){
+  const t=$('#toast');$('#toastMsg').textContent=msg;
+  t.querySelectorAll('button').forEach(b=>b.remove());
+  if(undo){const b=document.createElement('button');b.textContent='Rückgängig';b.dataset.act='undo';t.appendChild(b)}
+  t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),undo?6000:2600);
+}
+function snapshot(){ui.undo=JSON.stringify(S)}
+function undo(){if(!ui.undo)return;S={...defaults(),...JSON.parse(ui.undo)};ui.undo=null;save();$('#toast').classList.remove('show');render()}
+async function refresh(force){
+  if(force)net.bust=Date.now();
+  net.skipUntil=0;net.fail=0;
+  const b=$('#refresh');b.classList.add('spin');
+  await render(true);
+  if(ui.sheet==='club')loadClubBody();
+  if(ui.sheet==='diag')renderSheet();
+  b.classList.remove('spin');
+}
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const act=el.dataset.act,id=el.dataset.id;
+  switch(act){
+    case 'nav':go(id);break;
+    case 'refresh':refresh(true);break;
+    case 'diag':openSheet('diag');break;
+    case 'closeSheet':closeSheet();break;
+    case 'undo':undo();break;
+    case 'fav':e.stopPropagation();toggleFav(el.dataset.t,id);break;
+    case 'sport':{
+      const i=S.sports.indexOf(id);
+      if(i>=0){if(S.sports.length===1){toast('Eine Sportart musst du auswählen.');break}S.sports.splice(i,1)}else S.sports.push(id);
+      save();render(true);break}
+    case 'resetSports':snapshot();S.sports=['football','handball'];save();render(true);toast('Zurückgesetzt',true);break;
+    case 'league':{
+      const i=S.leagues.indexOf(id);if(i>=0)S.leagues.splice(i,1);else S.leagues.push(id);
+      save();const c=el.querySelector('.chk');if(c)c.classList.toggle('on',S.leagues.includes(id));break}
+    case 'resetLeagues':snapshot();S.leagues=[];save();render(true);toast('Auswahl zurückgesetzt',true);break;
+    case 'clearCountry':S.country=null;save();render(true);break;
+    case 'country':selectCountry(S.country===id?null:id);render(true);break;
+    case 'resetCountry':snapshot();S.country=null;save();render(true);toast('Zurückgesetzt',true);break;
+    case 'tl':S.tableLeague=id;save();render(true);break;
+    case 'tv':S.tableView=id;save();render(true);break;
+    case 'resetTable':ui.q.tabelle='';S.tableView='table';save();render(true);break;
+    case 'club':{const c=REG.get('club:'+id);if(c){S.club=c;save();openSheet('club')}break}
+    case 'openKader':if(S.club)openSheet('club');break;
+    case 'resetClub':snapshot();S.club=null;ui.q.verein='';save();render(true);toast('Zurückgesetzt',true);break;
+    case 'openFav':{
+      const t=el.dataset.t;
+      if(t==='league'){const l=leagueById(id);if(!S.leagues.includes(id))S.leagues.push(id);S.tableLeague=id;if(l&&!S.sports.includes(l.sport))S.sports.push(l.sport);if(l&&S.country&&l.c!==S.country){S.country=null;toast('Länderfilter aufgehoben')}go('tabelle')}
+      else if(t==='club'){const c=S.favs.find(f=>f.t==='club'&&String(f.id)===String(id));if(c){regClub(c);S.club=c;save();openSheet('club')}}
+      else{selectCountry(id);go('land')}
+      break}
+    case 'resetFavs':snapshot();S.favs=[];save();render(true);toast('Favoriten zurückgesetzt',true);break;
+    case 'reloadAll':refresh(true);break;
+    case 'checkSrc':checkSources();break;
+    case 'saveKeys':{const a=$('#kfd'),b=$('#kah');S.keys={fd:a?a.value.trim():'',ah:b?b.value.trim():''};save();net.bust=Date.now();net.fail=0;net.skipUntil=0;toast('Schlüssel gespeichert');renderSheet();render(true);break}
+    case 'demoToggle':S.demo=!S.demo;save();net.bust=Date.now();renderSheet();render(true);break;
+  }
+});
+document.addEventListener('input',e=>{
+  const el=e.target.closest('[data-q]');if(!el)return;
+  ui.q[el.dataset.q]=el.value;clearTimeout(ui.qT);
+  ui.qT=setTimeout(()=>{if(ui.reload)ui.reload()},el.dataset.q==='verein'?450:120);
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='clubView'){S.clubView=e.target.value;save();loadClubBody()}
+});
+
+/* ---------- Start & automatische Aktualisierung ---------- */
+if(S.club)regClub(S.club);S.favs.filter(f=>f.t==='club').forEach(regClub);
+buildRail();
+if(S.favs.length&&S.tab==='liga'&&!localStorage.getItem('henry-seen'))S.tab='statistik';
+try{localStorage.setItem('henry-seen','1')}catch(e){}
+render();
+setInterval(()=>{
+  if(document.visibilityState!=='visible'||ui.sheet==='diag')return;
+  const a=document.activeElement;if(a&&a.tagName==='INPUT')return;
+  refresh(true);
+},CONFIG.refreshMs);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-(net.okAt||0)>60000)refresh(true)});
+window.addEventListener('online',()=>refresh(true));
+setInterval(updateChip,30000);
+</script>
+<script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)&&location.hostname!=='localhost'){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+</body>
+</html>
