@@ -20,7 +20,7 @@ jobs:
           mkdir www
           cp index.html manifest.webmanifest icon-192.png icon-512.png icon-maskable.png www/
           cat > capacitor.config.json <<'EOF'
-          {"appId":"de.henry.ergebnisse","appName":"Henrys Ergebnisse","webDir":"www","plugins":{"CapacitorHttp":{"enabled":true}}}
+          {"appId":"de.henry.ergebnisse","appName":"Henrys Sport App","webDir":"www","plugins":{"CapacitorHttp":{"enabled":true}}}
           EOF
           npx cap add android
           npx cap sync android
