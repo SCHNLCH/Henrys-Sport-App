@@ -289,6 +289,10 @@ body{background:radial-gradient(120% 90% at 50% 20%,#14305a 0%,#050d1c 72%)}
 .ev[class*="sp-"],.row[class*="sp-"],.stc[class*="sp-"],.fav[class*="sp-"]{
   background:linear-gradient(100deg,var(--spa),rgba(0,0,0,0) 65%),var(--card);
   border-color:var(--spb);box-shadow:inset 5px 0 0 var(--spc),var(--shadow)}
+/* Highlights und Fernsehen */
+.evx{grid-column:1/-1;margin-top:8px;padding-top:8px;border-top:1px solid rgba(120,170,255,.16);font-size:13px;line-height:1.4;color:var(--muted)}
+.evx a{color:var(--spc,var(--acc2,#8aa2ff));font-weight:700;text-decoration:none;white-space:nowrap}
+.evx a.yt{font-size:14px}
 </style>
 </head>
 <body>
@@ -934,7 +938,42 @@ function nev(e){
   const hs=toNum(live?e.lhs:e.intHomeScore),as=toNum(live?e.las:e.intAwayScore);
   return {id:e.idEvent,home:tn(e.strHomeTeam||'?'),away:tn(e.strAwayTeam||'?'),hid:e.idHomeTeam,aid:e.idAwayTeam,
     hb:e.strHomeTeamBadge,ab:e.strAwayTeamBadge,hs,as,live,done:!live&&hs!==null&&as!==null,d:evDate(e),
-    hasTime:!!(e.strTime&&e.strTime!=='00:00:00')||!!e.strTimestamp,league:lgDE(e),sp:(leagueById(e.idLeague)||{}).sport||sportOf(e.strSport)||''};
+    hasTime:!!(e.strTime&&e.strTime!=='00:00:00')||!!e.strTimestamp,league:lgDE(e),sp:(leagueById(e.idLeague)||{}).sport||sportOf(e.strSport)||'',lid:String(e.idLeague||'')};
+}
+/* ---------- Fernsehen (Free-TV) und YouTube-Highlights an den Spielkarten ---------- */
+/* Stand Oktober 2026, nach den Senderrechten je Wettbewerb. Welches einzelne Spiel im Free-TV läuft, steht oft erst kurz vorher fest. */
+const TV_PAY='Live nur im Pay-TV oder Stream, kein Free-TV bekannt';
+const TV={
+  '4391':'RTL (Free-TV) zeigt nur ausgewählte Spiele: je ein Sonntagsspiel um 19 und 22 Uhr, Nachtspiele und alle International Games. Die Auswahl steht erst kurz vorher fest. Alle anderen Spiele nur bei Sky oder RTL+.',
+  '4331':'Live nur bei Sky oder DAZN. Free-TV: einzelne Freitagsspiele bei Sat.1, danach Zusammenfassungen in der Sportschau (ARD), im ZDF-Sportstudio und bei RTL.',
+  'ss-fb-dfb':'Alle Spiele live bei Sky oder WOW. Einzelne Partien auch im Free-TV (ARD, ZDF, RTL). Das Finale am 29.05.2027 läuft im Free-TV.',
+  'ss-fb-cl':'Live bei DAZN und Amazon Prime (Dienstag). Im Free-TV nur ZDF-Zusammenfassung mittwochs ab 23 Uhr. Das Finale am 05.06.2027 läuft live im ZDF.',
+  'ss-fb-el':'Live nur bei RTL+ (Abo), kein Free-TV.',
+  'ss-fb-nl':'Länderspiele der DFB-Männer: Free-TV bei ARD, ZDF oder RTL. Welcher Sender, steht kurz vorher fest.',
+  'ss-fb-wmq':'Länderspiele der DFB-Männer: Free-TV bei ARD, ZDF oder RTL. Welcher Sender, steht kurz vorher fest.',
+  'ss-fb-emq':'Länderspiele der DFB-Männer: Free-TV bei ARD, ZDF oder RTL. Welcher Sender, steht kurz vorher fest.',
+  '4335':TV_PAY,'4334':TV_PAY,'4328':TV_PAY,'4332':TV_PAY,
+  '4533':'Live komplett bei Dyn (Abo). Free-TV: bis zu 12 Spiele pro Saison in ARD, ZDF und den Dritten, sonntags 15 Uhr ein Spiel bei WELT. Einzelne Topspiele kostenlos im Joyn-Stream.',
+  'ss-hb-em':'Europameisterschaft: Free-TV bei ARD und ZDF.',
+  'ss-hb-wm':'Weltmeisterschaft: Free-TV bei ProSieben, ProSieben MAXX und Joyn (ProSiebenSat.1).',
+  'ss-hb-wmq':'Länderspiele der DHB-Teams: ProSieben, ProSieben MAXX und Joyn (kostenlos).',
+  'ss-hb-emq':'Länderspiele der DHB-Teams: ProSieben, ProSieben MAXX und Joyn (kostenlos).'
+};
+function tvFor(e){
+  if(e.done||e.live)return '';
+  if(e.lid==='bl2'){
+    const d=e.d;
+    return d&&d.getDay()===6&&d.getHours()===20&&d.getMinutes()===30?'RTL zeigt dieses Samstag-Topspiel um 20:30 Uhr im Free-TV.':'Free-TV nur beim Samstag-Topspiel um 20:30 Uhr (RTL). Sonst Pay-TV.';
+  }
+  return TV[e.lid]||'';
+}
+const ytUrl=e=>'https://www.youtube.com/results?search_query='+encodeURIComponent(`${e.home} ${e.away} Highlights${e.d?' '+e.d.getFullYear():''}`);
+const tvUrl=e=>'https://www.google.com/search?q='+encodeURIComponent(`${e.home} ${e.away} TV Übertragung`);
+function evExtra(e){
+  if(e.done)return `<div class="evx"><a class="yt" href="${ytUrl(e)}" target="_blank" rel="noopener">▶ Highlights auf YouTube</a></div>`;
+  if(e.live)return '';
+  const t=tvFor(e);
+  return `<div class="evx"><span class="tv">📺 ${t?esc(t):'Sender für dieses Spiel nicht bekannt.'}</span> <a href="${tvUrl(e)}" target="_blank" rel="noopener">Sender suchen</a></div>`;
 }
 function evCard(e){
   const hw=e.done&&e.hs>e.as,aw=e.done&&e.as>e.hs;
@@ -944,7 +983,7 @@ function evCard(e){
   return `<div class="ev${e.sp?' sp-'+e.sp:''}"><div class="evd">${e.live?'<span class="livetag">● läuft gerade</span> ':''}${esc(day)}${e.league?' · '+esc(e.league):''}</div>
     <div class="tms"><div class="tm ${hw?'w':''}">${badge(e.hb,e.home)}<span>${esc(e.home)}</span></div>
     <div class="tm ${aw?'w':''}">${badge(e.ab,e.away)}<span>${esc(e.away)}</span></div></div>
-    <div class="scs">${scs}</div></div>`;
+    <div class="scs">${scs}</div>${evExtra(e)}</div>`;
 }
 const fmtDate=new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
 function staleBanner(evs){
@@ -1252,7 +1291,7 @@ async function pageStat(box,tok){
   box.innerHTML=`<h2>Letzte Spiele</h2><div id="sres">${loading()}</div>
     <h2>Nächste Spiele</h2><div id="snxt">${loading('')}</div>
     <h2>Statistiken von meinen Favoriten</h2><div id="ssts">${loading('Lade Zahlen …')}</div>
-    <p class="legend">Sp = Spiele · P = Punkte · T = Tore · TD = Tordifferenz · GT = Gegentore<br>Kreise rechts: die letzten 3 Spiele (✓ gewonnen, – unentschieden, ✗ verloren)</p>`;
+    <p class="legend">Sp = Spiele · P = Punkte · T = Tore · TD = Tordifferenz · GT = Gegentore<br>Kreise rechts: die letzten 3 Spiele (✓ gewonnen, – unentschieden, ✗ verloren)<br>TV-Angaben nach den Senderrechten (Stand Oktober 2026). Einzelne Spiele können abweichen.</p>`;
   const clubs=favs.filter(f=>f.t==='club');
   const gamesP=(async()=>{
     const groups=[];
