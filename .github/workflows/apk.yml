@@ -16,7 +16,7 @@ jobs:
       - name: Capacitor einrichten
         run: |
           npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/local-notifications@6
           mkdir www
           cp index.html manifest.webmanifest icon-192.png icon-512.png icon-maskable.png www/
           cat > capacitor.config.json <<'EOF'
@@ -24,6 +24,11 @@ jobs:
           EOF
           npx cap add android
           npx cap sync android
+      - name: Benachrichtigungs-Recht
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q POST_NOTIFICATIONS $M || sed -i 's#<application#<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application#' $M
+          grep -n POST_NOTIFICATIONS $M
       - name: Icon und Farben setzen
         run: |
           R=android/app/src/main/res
