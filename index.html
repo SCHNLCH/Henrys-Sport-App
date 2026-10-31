@@ -238,7 +238,7 @@ small,.small{font-size:14px;color:var(--muted)}
    Ohne Internet / bei Fehlern schaltet die App auf klar gekennzeichnete DEMO-Daten.
    Demo erzwingen: Datei mit ?demo=1 öffnen oder im Datenstatus umschalten.
    ===================================================================== */
-const CONFIG={key:'3',perMin:24,refreshMs:120000,maxFav:9,forceDemo:/[?&]demo=1/.test(location.search)};
+const CONFIG={key:'123',perMin:24,refreshMs:120000,maxFav:9,forceDemo:/[?&]demo=1/.test(location.search)};
 
 /* ---------- Katalog ---------- */
 const SPORTS=[
@@ -376,7 +376,7 @@ const ui={q:{liga:'',verein:'',tabelle:''},sheet:null,tok:0,dirty:false,lastTab:
 const REG=new Map();
 const regClub=c=>{REG.set('club:'+c.id,c);return c};
 const isFav=(t,id)=>S.favs.some(f=>f.t===t&&String(f.id)===String(id));
-const demoMode=()=>CONFIG.forceDemo||S.demo;
+const demoMode=()=>false;
 
 /* Ligen, die jetzt gelten (Sportart + Land + Auswahl) */
 function poolLeagues(){return LEAGUES.filter(l=>S.sports.includes(l.sport)&&(!S.country||l.c===S.country))}
@@ -449,7 +449,7 @@ async function data(path,ttl,demoFn){
   try{const d=await fetchJSON(path);cset(path,d);return d}
   catch(e){
     if(hit)return hit.d;
-    net.demoAt=Date.now();net.demoCount++;return demoFn();
+    return {};
   }
 }
 
@@ -686,7 +686,7 @@ function staleBanner(evs){
   const newest=Math.max(...done.map(e=>+e.d));
   return Date.now()-newest>28*864e5?`<div class="banner">⚠️ Die Datenquelle meldet seit dem ${fmtDate.format(new Date(newest))} keine neuen Ergebnisse. Die Zahlen können veraltet sein.</div>`:'';
 }
-const DEMO_BAR=`<div class="demobar" data-act="diag">⚠️ Beispieldaten: Diese Ergebnisse sind ausgedacht und nicht echt!<br><small>Tippe hier, um zu sehen, warum keine echten Daten kommen.</small></div>`;
+const DEMO_BAR='';
 const uniqEv=a=>{const m=new Map();a.forEach(e=>m.set(e.id||e.home+e.away+(e.d&&+e.d),e));return [...m.values()]};
 const byDateDesc=(a,b)=>(b.d||0)-(a.d||0);
 const byDateAsc=(a,b)=>(a.d||0)-(b.d||0);
