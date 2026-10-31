@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#4f8cff">
+<meta name="theme-color" content="#0f2a56">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -207,6 +207,59 @@ small,.small{font-size:14px;color:var(--muted)}
 .rail button:active{transform:scale(.92)}
 .rail [data-id=statistik]{--c:#7c4dff}.rail [data-id=sportart]{--c:#ff8a00}.rail [data-id=land]{--c:#00a99b}
 .rail [data-id=verein]{--c:#2f80ff}.rail [data-id=tabelle]{--c:#16b364}.rail [data-id=favoriten]{--c:#ff3d7f}.rail [data-id=liga]{--c:#ff5a5f}
+
+/* ===== HenryMagicLive Design: Marineblau, Blauverlauf, leuchtende Ringe ===== */
+:root{color-scheme:dark;
+  --bg:#0a1730;--card:#112349;--text:#e6f0ff;--muted:#8fa6cc;--line:#1d3563;
+  --acc:#3b8cf0;--acc2:#7cc4ff;--acc-soft:rgba(91,150,240,.18);
+  --heart:#ff6fa0;--ok:#35d08a;--bad:#ff6b6b;--draw:#7d8fb3;
+  --shadow:0 6px 18px rgba(0,0,0,.38);--live:#ffb26b}
+.device[data-tab]{--acc:#3b8cf0;--acc2:#7cc4ff;--acc-soft:rgba(91,150,240,.18)}
+body{background:radial-gradient(120% 90% at 50% 20%,#14305a 0%,#050d1c 72%)}
+.device{background:radial-gradient(120% 70% at 50% 0%,#12294f 0%,#0a1730 55%,#060f20 100%)}
+@media (min-width:560px){.device{border-color:#0c1a33;box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 40px rgba(60,120,240,.25)}}
+.topbar{position:relative;overflow:hidden;background:linear-gradient(135deg,#0f2a56 0%,#1b4a95 62%,#2f7ae6 100%);box-shadow:0 10px 30px rgba(20,60,140,.5),inset 0 -1px 0 rgba(160,200,255,.28)}
+.topbar::before{content:"";position:absolute;right:-8px;top:-14px;width:150px;height:150px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20480%20480'%3E%3Cpath%20fill%3D'white'%20fill-rule%3D'evenodd'%20d%3D'M326%20282%20L323%20283%20L308%20295%20L306%20298%20L307%20419%20L306%20421%20L300%20420%20L292%20416%20L285%20408%20L277%20393%20L274%20372%20L275%20335%20L274%20322%20L270%20322%20L254%20330%20L254%20333%20L255%20384%20L258%20398%20L265%20414%20L274%20424%20L284%20432%20L295%20438%20L311%20442%20L322%20442%20L325%20441%20L326%20439%20L327%20322ZM174%20156%20L155%20156%20L136%20163%20L123%20173%20L114%20183%20L110%20190%20L104%20206%20L102%20222%20L103%20289%20L106%20290%20L121%20282%20L123%20278%20L122%20224%20L124%20212%20L127%20201%20L131%20194%20L137%20188%20L144%20182%20L153%20178%20L155%20181%20L154%20263%20L156%20265%20L159%20265%20L172%20260%20L175%20258%20L176%20250%20L175%20157ZM378%2072%20L374%2072%20L374%2078%20L361%20110%20L359%20113%20L358%20117%20L351%20122%20L315%20135%20L315%20137%20L317%20138%20L351%20152%20L354%20154%20L360%20154%20L361%20156%20L361%20164%20L358%20180%20L352%20196%20L336%20222%20L319%20243%20L293%20267%20L252%20292%20L224%20305%20L207%20310%20L168%20327%20L144%20340%20L130%20350%20L114%20365%20L108%20374%20L98%20391%20L98%20393%20L100%20393%20L118%20376%20L143%20360%20L148%20358%20L150%20359%20L150%20367%20L139%20389%20L133%20398%20L117%20414%20L102%20421%20L92%20424%20L78%20422%20L70%20414%20L66%20401%20L66%20394%20L68%20380%20L80%20358%20L94%20341%20L110%20328%20L134%20312%20L172%20296%20L236%20272%20L256%20262%20L278%20246%20L292%20236%20L304%20220%20L318%20200%20L318%20196%20L314%20197%20L310%20203%20L294%20218%20L281%20226%20L284%20215%20L294%20198%20L306%20184%20L317%20173%20L334%20163%20L335%20160%20L334%20159%20L320%20162%20L300%20173%20L284%20186%20L268%20207%20L258%20229%20L255%20241%20L252%20244%20L236%20251%20L157%20280%20L136%20289%20L101%20310%20L78%20329%20L60%20353%20L52%20369%20L48%20385%20L48%20400%20L50%20414%20L54%20424%20L62%20432%20L79%20440%20L96%20442%20L113%20436%20L132%20426%20L150%20408%20L161%20390%20L171%20364%20L174%20346%20L176%20344%20L227%20326%20L252%20316%20L282%20300%20L298%20288%20L323%20264%20L341%20241%20L357%20210%20L363%20194%20L366%20180%20L368%20180%20L376%20199%20L378%20199%20L393%20154%20L395%20152%20L409%20146%20L437%20137%20L437%20135%20L405%20123%20L394%20117Z'%2F%3E%3C%2Fsvg%3E") no-repeat center/contain;opacity:.1;pointer-events:none}
+.topbar h1{text-shadow:0 0 14px rgba(140,200,255,.55)}
+.ticon{border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(157,184,230,.38),rgba(95,132,196,.16));border:1px solid rgba(185,208,255,.5);box-shadow:0 0 18px rgba(110,170,255,.55);transform:none}
+.ticon svg{stroke:#d4eeff}
+.empty,.card,.ev,.stc,.fav,.pl,.filter,.row{background:var(--card);border:1px solid rgba(120,170,255,.14)}
+.chk{background:#0c1d3d;border-color:#3a5a95}
+.chk.on{background:linear-gradient(135deg,#2f7ae6,#7cc4ff);border-color:#7cc4ff;box-shadow:0 0 10px rgba(110,170,255,.6)}
+.search{background:#0c1d3d;color:var(--text);border-color:rgba(120,170,255,.18)}
+.search::placeholder{color:#7f98c4}
+.search:focus{border-color:#7cc4ff;box-shadow:0 0 0 3px rgba(110,170,255,.25)}
+.cp{background:var(--card);color:var(--text);border:1px solid rgba(120,170,255,.14)}
+.cp.on,.btn,.ddbtn{background:linear-gradient(135deg,#2f7ae6,#7cc4ff);color:#fff;box-shadow:0 8px 22px rgba(47,122,230,.45)}
+.seg{background:var(--card);border:1px solid rgba(120,170,255,.14)}
+.seg button{color:var(--text)}
+.seg button.on{background:linear-gradient(135deg,#2f7ae6,#5aa8ff);box-shadow:0 0 14px rgba(90,160,255,.5)}
+.reset,.pts,.sc,.dd select{color:#9ccfff}
+.ev .evd,.gh small,.grp,.filter a{color:#8fc2ff}
+.sc.l{color:var(--muted)}
+.livetag{color:var(--live);text-shadow:0 0 10px rgba(255,178,107,.55)}
+.chip.live i{background:var(--live);box-shadow:0 0 0 3px rgba(255,178,107,.35)}
+.stg div:nth-child(1){background:rgba(59,140,240,.2);color:#8fc2ff}
+.stg div:nth-child(2){background:rgba(53,208,138,.18);color:#5de0a2}
+.stg div:nth-child(3){background:rgba(255,178,107,.18);color:#ffc58a}
+.stg div:nth-child(4){background:rgba(160,130,255,.2);color:#c0adff}
+.stg div:nth-child(5){background:rgba(255,107,107,.18);color:#ff9a9a}
+.trow .rk{background:#183160}
+.bdg:not(.ini){background:#fff;padding:3px}
+.banner{background:rgba(255,178,107,.15);color:#ffd9b0}
+.keys{background:#0c1d3d}.keys label small{color:var(--muted)}
+.keys input{background:#0a1730;color:var(--text);border-color:#2a4780}
+.diag{color:var(--text)}.diag div{border-bottom-color:#1d3563}
+.shead .iconbtn{background:rgba(255,255,255,.1)}
+.sheet .box{border-top:1px solid rgba(140,180,255,.25)}
+.sheet .box::before{background:#35508a}
+.pl img{background:#183160}
+.dock small{background:rgba(10,23,48,.85);color:var(--text)}
+.toast{background:#12306a;border:1px solid rgba(140,180,255,.3)}
+.rail{background:rgba(12,28,58,.92);border:1px solid rgba(140,180,255,.22);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 24px rgba(60,120,240,.28)}
+.rail button[data-id]{--c:#8fb4ff}
+.rail button.on{background:linear-gradient(135deg,rgba(59,140,240,.4),rgba(124,196,255,.2));box-shadow:0 0 14px rgba(90,160,255,.45)}
+.rail button[data-id].on{--c:#e6f4ff}
 </style>
 </head>
 <body>
