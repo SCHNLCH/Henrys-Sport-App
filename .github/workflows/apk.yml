@@ -27,6 +27,7 @@ jobs:
       - name: Icon und Farben setzen
         run: |
           R=android/app/src/main/res
+          sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
           IM=convert; command -v magick >/dev/null 2>&1 && IM=magick
           for d in mdpi:48:108 hdpi:72:162 xhdpi:96:216 xxhdpi:144:324 xxxhdpi:192:432; do
             IFS=: read n s f <<< "$d"
