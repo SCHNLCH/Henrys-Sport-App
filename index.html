@@ -777,6 +777,52 @@ async function ssClubs(lid){
   ms.forEach(x=>{[[x.hid,x.hn,x.hb],[x.aid,x.an,x.ab]].forEach(([id,n,b])=>{if(id&&n&&!m[id])m[id]={idTeam:id,strTeam:n,strBadge:b||''}})});
   return Object.values(m);
 }
+/* ---------- ESPN: NFL-Ergebnisse, Spielplan und Tabelle (offene Schnittstelle, kein Schlüssel) ---------- */
+const ESPN_BASE='https://site.api.espn.com/apis/site/v2/sports/football/nfl/';
+const espnTeamId=n=>'st:nfl:'+norm(n);
+function espnMatch(e,wk){
+  const c=(e.competitions&&e.competitions[0])||{},cs=c.competitors||[];
+  const h=cs.find(x=>x.homeAway==='home'),a=cs.find(x=>x.homeAway==='away');
+  if(!h||!a||!h.team||!a.team)return null;
+  const st=(e.status&&e.status.type)||{},done=!!st.completed,live=st.state==='in';
+  const sc=x=>{const v=parseInt(x.score,10);return isNaN(v)?null:v};
+  const hn=h.team.displayName,an=a.team.displayName;
+  return {id:'es'+e.id,hn,an,hid:espnTeamId(hn),aid:espnTeamId(an),hb:h.team.logo||'',ab:a.team.logo||'',
+    hs:done?sc(h):null,as:done?sc(a):null,lhs:live?sc(h):null,las:live?sc(a):null,live,t:e.date||'',rd:wk,lg:'NFL'};
+}
+async function espnMatches(){
+  const yr=olSeason(),k='ESPNC:'+yr,hit=cget(k);
+  if(hit&&Date.now()-hit.t<2*60e3&&hit.t>net.bust)return hit.d;
+  if(demoMode())throw new Error('Beispiel-Modus');
+  try{
+    const jobs=[];
+    for(let w=1;w<=18;w++)jobs.push([2,w]);
+    if(Date.now()>Date.UTC(yr+1,0,1))[1,2,3,5].forEach(w=>jobs.push([3,w]));
+    const parts=await Promise.all(jobs.map(([t,w])=>fetchJSON(`scoreboard?seasontype=${t}&week=${w}&dates=${yr}`,ESPN_BASE,{name:'ESPN'}).catch(()=>null)));
+    const seen={},out=[];
+    parts.forEach((j,i)=>((j&&j.events)||[]).forEach(e=>{const m=espnMatch(e,jobs[i][1]);if(m&&!seen[m.id]){seen[m.id]=1;out.push(m)}}));
+    if(!out.length)throw new Error('leer');
+    cset(k,out);return out;
+  }catch(e){if(hit)return hit.d;throw e}
+}
+async function espnTable(lid){
+  const ms=(await espnMatches()).filter(m=>m.hs!==null).sort((a,b)=>(Date.parse(a.t)||0)-(Date.parse(b.t)||0));
+  const T={};
+  const row=(id,n,b)=>T[id]||(T[id]={id,n,b,p:0,w:0,d:0,l:0,f:0,a:0,form:[]});
+  ms.forEach(m=>{
+    const H=row(m.hid,m.hn,m.hb),A=row(m.aid,m.an,m.ab);
+    H.p++;A.p++;H.f+=m.hs;H.a+=m.as;A.f+=m.as;A.a+=m.hs;
+    if(m.hs>m.as){H.w++;A.l++;H.form.push('W');A.form.push('L')}
+    else if(m.hs<m.as){A.w++;H.l++;A.form.push('W');H.form.push('L')}
+    else{H.d++;A.d++;H.form.push('D');A.form.push('D')}
+  });
+  NFL_CLUBS.forEach(n=>row(espnTeamId(n),n,''));
+  const pct=r=>r.p?(r.w+r.d/2)/r.p:0;
+  return Object.values(T).sort((x,y)=>pct(y)-pct(x)||(y.f-y.a)-(x.f-x.a)||y.f-x.f).map((r,i)=>({
+    intRank:String(i+1),idTeam:r.id,strTeam:r.n,strBadge:r.b,idLeague:lid,strForm:r.form.slice(-5).join(''),
+    intPlayed:String(r.p),intWin:String(r.w),intDraw:String(r.d),intLoss:String(r.l),intGoalsFor:String(r.f),
+    intGoalsAgainst:String(r.a),intGoalDifference:String(r.f-r.a),intPoints:String(r.w)}));
+}
 /* Feste Vereinsliste der NFL (die Quelle für Tabellen liefert sie nicht zuverlässig) */
 const NFL_CLUBS=['Arizona Cardinals','Atlanta Falcons','Baltimore Ravens','Buffalo Bills','Carolina Panthers','Chicago Bears','Cincinnati Bengals','Cleveland Browns','Dallas Cowboys','Denver Broncos','Detroit Lions','Green Bay Packers','Houston Texans','Indianapolis Colts','Jacksonville Jaguars','Kansas City Chiefs','Las Vegas Raiders','Los Angeles Chargers','Los Angeles Rams','Miami Dolphins','Minnesota Vikings','New England Patriots','New Orleans Saints','New York Giants','New York Jets','Philadelphia Eagles','Pittsburgh Steelers','San Francisco 49ers','Seattle Seahawks','Tampa Bay Buccaneers','Tennessee Titans','Washington Commanders'];
 const staticClubs=lid=>lid==='4391'?NFL_CLUBS.map(n=>({idTeam:'st:nfl:'+norm(n),strTeam:n,strBadge:''})):[];
@@ -786,9 +832,11 @@ async function leagueClubs(l){
   if(SS[l.id]){try{rows=await ssClubs(l.id)}catch(e){}}
   if(!rows.length){try{rows=await getTable(l.id,l.sport)}catch(e){}}
   if(!rows.length)rows=staticClubs(l.id);
+  if(l.id==='4391'){try{const b={};(await espnMatches()).forEach(m=>{b[m.hid]=m.hb;b[m.aid]=m.ab});rows=rows.map(r=>({...r,strBadge:r.strBadge||b[r.idTeam]||''}))}catch(e){}}
   return rows;
 }
 async function getTable(lid,sport){
+  if(lid==='4391'){try{const t=await espnTable(lid);if(t.length)return t}catch(e){}}
   if(OL[lid]){try{if(await olUsable(lid)){const t=await olTable(lid);if(t.length)return t}}catch(e){}}
   if(extFor(lid)){try{const t=await extTable(lid);if(t.length)return t}catch(e){}}
   if(lid==='bl2')return [];
@@ -796,6 +844,7 @@ async function getTable(lid,sport){
   return ((j&&j.table)||[]).map(r=>({...r,strTeam:tn(r.strTeam)}));
 }
 async function getLeagueEvents(lid,kind){
+  if(lid==='4391'){try{const ms=await espnMatches();if(ms.length)return olPick(ms,kind,15,lid).map(nev)}catch(e){}}
   if(SS[lid]){try{const ms=await ssMatches(lid);if(ms.length)return olPick(ms,kind,15,lid).map(nev)}catch(e){}}
   if(OL[lid]){try{if(await olUsable(lid)){const r=olPick(await olMatches(OL[lid]),kind,15,lid).map(nev);if(r.length||lid==='bl2')return r}}catch(e){}}
   if(extFor(lid)){try{const r=olPick(await extMatches(lid),kind,15,lid).map(nev);if(r.length)return r}catch(e){}}
@@ -809,6 +858,7 @@ async function getTeamEvents(tid,kind){
 }
 /* Spiele eines Vereins (kind: 'last' | 'next'); Bundesliga-Vereine kommen aus den Saisondaten von OpenLigaDB */
 async function getClubEvents(c,kind){
+  if(c.lid==='4391'){try{const ms=await espnMatches(),nm=norm(tn(c.name));const mine=ms.filter(m=>m.hid===c.id||m.aid===c.id||norm(m.hn)===nm||norm(m.an)===nm);if(mine.length)return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev)}catch(e){}}
   if(SS[c.lid]){try{const ms=await ssMatches(c.lid),nm=norm(c.name);const mine=ms.filter(m=>m.hid===c.id||m.aid===c.id||norm(tn(m.hn))===nm||norm(tn(m.an))===nm);if(mine.length)return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev)}catch(e){}}
   if(OL[c.lid]){
     try{
