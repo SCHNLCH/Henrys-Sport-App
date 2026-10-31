@@ -1,6 +1,6 @@
-# Henrys Ergebnisse
+# HenryMagicLive
 
-Fußball- und Handball-Ergebnisse für Henry. Läuft lokal im Handy, ohne Konto und ohne Server.
+Fußball-, Handball- und NFL-Ergebnisse (American Football) für Henry. Läuft lokal im Handy, ohne Konto und ohne Server.
 
 ## Webseite und App auf dem Startbildschirm
 1. Im Repository: Settings → Pages → Source: **GitHub Actions**.
@@ -9,4 +9,4 @@ Fußball- und Handball-Ergebnisse für Henry. Läuft lokal im Handy, ohne Konto 
 4. Auf dem Handy in Chrome öffnen → Menü ⋮ → **App installieren**.
 
 ## APK bauen (optional)
-Reiter **Actions** → „APK bauen" → **Run workflow**. Nach ein paar Minuten steht unter dem Lauf bei „Artifacts" die Datei `Henrys-Ergebnisse-APK`. Entpacken, `app-debug.apk` aufs Handy, installieren.
+Reiter **Actions** → „APK bauen" → **Run workflow**. Nach ein paar Minuten steht unter dem Lauf bei „Artifacts" die Datei `Henrys-Ergebnisse-APK` (App-Name: HenryMagicLive). Entpacken, `app-debug.apk` aufs Handy, installieren.
