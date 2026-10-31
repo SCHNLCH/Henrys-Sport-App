@@ -282,6 +282,13 @@ body{background:radial-gradient(120% 90% at 50% 20%,#14305a 0%,#050d1c 72%)}
 .rail button[data-id=tabelle]{--c:#84dcff}
 .rail button[data-id=favoriten]{--c:#86e8ff}
 .rail button[data-id=liga]{--c:#8af5f2}
+/* Sportarten-Farben: Fussball gruen, Handball orange, Football rot */
+.sp-football{--spa:rgba(46,204,113,.30);--spb:rgba(46,204,113,.55);--spc:#2ecc71}
+.sp-handball{--spa:rgba(255,159,46,.30);--spb:rgba(255,159,46,.55);--spc:#ff9f2e}
+.sp-american{--spa:rgba(255,90,110,.30);--spb:rgba(255,90,110,.55);--spc:#ff5a6e}
+.ev[class*="sp-"],.row[class*="sp-"],.stc[class*="sp-"],.fav[class*="sp-"]{
+  background:linear-gradient(100deg,var(--spa),rgba(0,0,0,0) 65%),var(--card);
+  border-color:var(--spb);box-shadow:inset 5px 0 0 var(--spc),var(--shadow)}
 </style>
 </head>
 <body>
@@ -927,14 +934,14 @@ function nev(e){
   const hs=toNum(live?e.lhs:e.intHomeScore),as=toNum(live?e.las:e.intAwayScore);
   return {id:e.idEvent,home:tn(e.strHomeTeam||'?'),away:tn(e.strAwayTeam||'?'),hid:e.idHomeTeam,aid:e.idAwayTeam,
     hb:e.strHomeTeamBadge,ab:e.strAwayTeamBadge,hs,as,live,done:!live&&hs!==null&&as!==null,d:evDate(e),
-    hasTime:!!(e.strTime&&e.strTime!=='00:00:00')||!!e.strTimestamp,league:lgDE(e)};
+    hasTime:!!(e.strTime&&e.strTime!=='00:00:00')||!!e.strTimestamp,league:lgDE(e),sp:(leagueById(e.idLeague)||{}).sport||sportOf(e.strSport)||''};
 }
 function evCard(e){
   const hw=e.done&&e.hs>e.as,aw=e.done&&e.as>e.hs;
   const day=e.d?fmtDay.format(e.d):'';
   const tm=e.d&&e.hasTime?fmtTime.format(e.d):'';
   const scs=e.done||(e.live&&e.hs!==null)?`<div class="sc ${e.live?'':hw?'':'l'}">${e.hs}</div><div class="sc ${e.live?'':aw?'':'l'}">${e.as}</div>`:`<div class="sc t">${tm||'–'}</div>`;
-  return `<div class="ev"><div class="evd">${e.live?'<span class="livetag">● läuft gerade</span> ':''}${esc(day)}${e.league?' · '+esc(e.league):''}</div>
+  return `<div class="ev${e.sp?' sp-'+e.sp:''}"><div class="evd">${e.live?'<span class="livetag">● läuft gerade</span> ':''}${esc(day)}${e.league?' · '+esc(e.league):''}</div>
     <div class="tms"><div class="tm ${hw?'w':''}">${badge(e.hb,e.home)}<span>${esc(e.home)}</span></div>
     <div class="tm ${aw?'w':''}">${badge(e.ab,e.away)}<span>${esc(e.away)}</span></div></div>
     <div class="scs">${scs}</div></div>`;
@@ -1091,7 +1098,7 @@ async function pageLiga(box){
     const q=norm(ui.q.liga);
     let list=poolLeagues();if(q)list=list.filter(l=>norm(l.name+l.short).includes(q));
     const el=slotEl(box,'list');if(!el)return;
-    el.innerHTML=list.length?list.map(l=>`<div class="row" data-act="league" data-id="${l.id}">
+    el.innerHTML=list.length?list.map(l=>`<div class="row sp-${l.sport}" data-act="league" data-id="${l.id}">
       <span class="chk ${S.leagues.includes(l.id)?'on':''}"></span>${flag(l.c)}<span class="grow">${esc(l.name)}<small>${esc(sportById(l.sport).name)}</small></span>${favBtn('league',l.id)}</div>`).join('')
       :emptyBox('🔎',q?'Keine Liga gefunden.<br><small>Prüfe die Suche.</small>':noLeagueMsg());
   };
@@ -1172,7 +1179,7 @@ async function pageVerein(box,tok){
       }
     }catch(e){note=emptyBox('😕','Das hat nicht geklappt.')}
     if(tok!==ui.tok)return;
-    el.innerHTML=clubs.map(c=>`<div class="row" data-act="club" data-id="${esc(c.id)}"><span class="chk ${S.club&&String(S.club.id)===String(c.id)?'on':''}"></span>
+    el.innerHTML=clubs.map(c=>`<div class="row${c.sport?' sp-'+c.sport:''}" data-act="club" data-id="${esc(c.id)}"><span class="chk ${S.club&&String(S.club.id)===String(c.id)?'on':''}"></span>
       ${badge(c.badge,c.name)}<span class="grow">${esc(c.name)}<small>${esc(c.league)}</small></span>${favBtn('club',c.id)}</div>`).join('')+note;
   };
   ui.reload=load;
@@ -1217,7 +1224,7 @@ async function pageLand(box,tok){
 /* ---- Sportart ---- */
 async function pageSportart(box){
   box.innerHTML=`<p class="hint">Wähle eine oder mehrere Sportarten aus, um dort nach einem Team oder Kader zu suchen. Du kannst aber auch Teams favorisieren.</p>
-    <div>${SPORTS.map(s=>`<div class="row" data-act="sport" data-id="${s.id}"><span class="chk ${S.sports.includes(s.id)?'on':''}"></span><span class="sico">${SICON[s.id]}</span><span class="grow">${s.name}</span></div>`).join('')}</div>
+    <div>${SPORTS.map(s=>`<div class="row sp-${s.id}" data-act="sport" data-id="${s.id}"><span class="chk ${S.sports.includes(s.id)?'on':''}"></span><span class="sico">${SICON[s.id]}</span><span class="grow">${s.name}</span></div>`).join('')}</div>
     ${resetBtn('Zurücksetzen','resetSports')}`;
 }
 
@@ -1226,7 +1233,7 @@ async function pageFav(box){
   const lab={league:'Liga',club:'Verein',country:'Land'};
   box.innerHTML=`<p class="hint">Hier werden dir deine Favoriten angezeigt. Du darfst nur 9 favorisieren, und zwar: Länder, Vereine und Ligen. Zum Favorisieren musst du nur auf das Herz daneben klicken.</p>
     <div class="count">${S.favs.length} von ${CONFIG.maxFav}</div>
-    ${S.favs.length?`<div class="favgrid">${S.favs.map(f=>`<div class="fav" data-act="openFav" data-t="${f.t}" data-id="${esc(f.id)}">${favBtn(f.t,f.id)}
+    ${S.favs.length?`<div class="favgrid">${S.favs.map(f=>`<div class="fav${f.sport?' sp-'+f.sport:''}" data-act="openFav" data-t="${f.t}" data-id="${esc(f.id)}">${favBtn(f.t,f.id)}
       <span class="t">${esc(f.t==='league'?(f.short||f.name):f.name)}<small>${lab[f.t]}</small></span></div>`).join('')}</div>`
     :emptyBox('♡','Noch keine Favoriten.<br><small>Tippe in Liga, Verein oder Land auf ein Herz.</small>',`<button class="btn" data-act="nav" data-id="liga">Ligen ansehen</button>`)}
     ${resetBtn('Favoriten alle zurücksetzen','resetFavs')}`;
@@ -1289,7 +1296,7 @@ async function pageStat(box,tok){
           const fm=r?String(r.strForm||'').replace(/[^WDL]/gi,'').toUpperCase().slice(-3).split(''):[];
           const sym={W:'✓',D:'–',L:'✗'};
           const pts=r?(toNum(r.intPoints)??toNum(r.intWin)??'–'):'–';
-          return `<div class="stc"><div class="top">${favBtn('club',f.id)}<span class="nm">${esc(f.name)}</span>
+          return `<div class="stc${f.sport?' sp-'+f.sport:''}"><div class="top">${favBtn('club',f.id)}<span class="nm">${esc(f.name)}</span>
             <span class="dots">${fm.map(x=>`<span class="dot ${x}">${sym[x]}</span>`).join('')}</span></div>
             <div class="stg"><div><b>${v('intPlayed')}</b><small>Sp</small></div><div><b>${pts}</b><small>P</small></div><div><b>${v('intGoalsFor')}</b><small>T</small></div><div><b>${v('intGoalDifference')}</b><small>TD</small></div><div><b>${v('intGoalsAgainst')}</b><small>GT</small></div></div></div>`;
         }).join('');
