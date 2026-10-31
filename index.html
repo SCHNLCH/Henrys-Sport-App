@@ -1236,6 +1236,8 @@ async function pageFav(box){
     ${S.favs.length?`<div class="favgrid">${S.favs.map(f=>`<div class="fav${f.sport?' sp-'+f.sport:''}" data-act="openFav" data-t="${f.t}" data-id="${esc(f.id)}">${favBtn(f.t,f.id)}
       <span class="t">${esc(f.t==='league'?(f.short||f.name):f.name)}<small>${lab[f.t]}</small></span></div>`).join('')}</div>`
     :emptyBox('♡','Noch keine Favoriten.<br><small>Tippe in Liga, Verein oder Land auf ein Herz.</small>',`<button class="btn" data-act="nav" data-id="liga">Ligen ansehen</button>`)}
+    <div class="row" data-act="notifToggle"><span class="chk ${notifOn()?'on':''}"></span><span class="grow">Benachrichtigungen<small>${!notifSupported()?'Auf diesem Gerät nicht möglich':notifOn()?'An: Pop-up bei neuem Spiel oder Ergebnis (nur bei geöffneter App)':'Aus'}</small></span></div>
+    ${notifOn()?`<button class="reset" data-act="notifTest"><i></i>Testmeldung senden</button> `:''}
     ${resetBtn('Favoriten alle zurücksetzen','resetFavs')}`;
 }
 
@@ -1463,6 +1465,15 @@ document.addEventListener('click',e=>{
       const i=S.sports.indexOf(id);
       if(i>=0){if(S.sports.length===1){toast('Eine Sportart musst du auswählen.');break}S.sports.splice(i,1)}else S.sports.push(id);
       save();render(true);break}
+    case 'notifToggle':{
+      if(!S.notif)S.notif={on:false,seen:{},fb:{}};
+      if(S.notif.on){S.notif.on=false;save();render(true);toast('Benachrichtigungen aus');break}
+      if(!notifSupported()){toast('Dein Gerät unterstützt keine Benachrichtigungen.');break}
+      notifAsk().then(ok=>{
+        if(!ok){toast('Erlaubnis fehlt. Bitte in den Einstellungen erlauben.');return}
+        S.notif.on=true;save();render(true);toast('Benachrichtigungen an');notifCheck(true)});
+      break}
+    case 'notifTest':notifShow('HenryMagicLive','So sehen deine Meldungen aus.','test');break;
     case 'resetSports':snapshot();S.sports=['football','handball'];save();render(true);toast('Zurückgesetzt',true);break;
     case 'league':{
       const i=S.leagues.indexOf(id);if(i>=0)S.leagues.splice(i,1);else S.leagues.push(id);
@@ -1499,6 +1510,67 @@ document.addEventListener('change',e=>{
   if(e.target.id==='clubView'){S.clubView=e.target.value;save();loadClubBody()}
 });
 
+/* ---------- Benachrichtigungen: Pop-up bei neuem Spiel oder Ergebnis der Favoriten (solange die App läuft) ---------- */
+const CAPLN=()=>{try{return (window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications)||null}catch(e){return null}};
+const notifSupported=()=>!!CAPLN()||('Notification' in window);
+const notifOn=()=>!!(S.notif&&S.notif.on);
+const NOTE={busy:false,last:0};
+async function notifAsk(){
+  try{
+    const ln=CAPLN();
+    if(ln){let r=await ln.checkPermissions();if(r&&r.display==='granted')return true;r=await ln.requestPermissions();return !!(r&&r.display==='granted')}
+    if(!('Notification' in window))return false;
+    if(Notification.permission==='granted')return true;
+    if(Notification.permission==='denied')return false;
+    return (await Notification.requestPermission())==='granted';
+  }catch(e){return false}
+}
+async function notifShow(title,body,tag){
+  try{
+    const ln=CAPLN();
+    if(ln){await ln.schedule({notifications:[{id:Math.floor(Math.random()*2e9),title,body}]});return}
+    const reg=('serviceWorker' in navigator)?await navigator.serviceWorker.getRegistration():null;
+    if(reg&&reg.showNotification){await reg.showNotification(title,{body,tag,icon:'icon-192.png',badge:'icon-192.png'});return}
+    new Notification(title,{body,tag,icon:'icon-192.png'});
+  }catch(e){}
+}
+async function notifCheck(force){
+  if(!notifOn()||NOTE.busy||!S.favs.length)return;
+  if(!force&&Date.now()-NOTE.last<150e3)return;
+  NOTE.busy=true;NOTE.last=Date.now();
+  try{
+    const N=S.notif,seen=N.seen||(N.seen={}),fb=N.fb||(N.fb={}),now=Date.now(),hits=[];
+    await Promise.all(S.favs.map(async f=>{
+      try{
+        let last=[],next=[];
+        if(f.t==='club'){last=await getClubEvents(f,'last');next=await getClubEvents(f,'next')}
+        else if(f.t==='league'){last=await getLeagueEvents(f.id,'past');next=await getLeagueEvents(f.id,'next')}
+        else return;
+        const fk=f.t+':'+f.id,quiet=!fb[fk],name=f.t==='league'?(f.short||f.name):f.name;
+        last.filter(e=>e.done).forEach(e=>{const k='r'+e.id;if(seen[k])return;seen[k]=1;
+          if(!quiet&&e.d&&now-(+e.d)<3*864e5)hits.push({r:1,name,e})});
+        next.forEach(e=>{const k='n'+e.id;if(seen[k]||seen['r'+e.id])return;
+          if(quiet){seen[k]=1;return}
+          const t=e.d?+e.d:0;
+          if(t&&t-now<7*864e5&&t>now-36e5){seen[k]=1;hits.push({r:0,name,e})}});
+        fb[fk]=1;
+      }catch(e){}
+    }));
+    const ks=Object.keys(seen);if(ks.length>1500)ks.slice(0,ks.length-1000).forEach(k=>delete seen[k]);
+    save();
+    if(!hits.length)return;
+    if(hits.length>4){
+      const nr=hits.filter(h=>h.r).length,nn=hits.length-nr;
+      await notifShow('HenryMagicLive',[nr?nr+' neue Ergebnisse':'',nn?nn+' neue Spiele':''].filter(Boolean).join(' und ')+' bei deinen Favoriten','sum');
+      return;
+    }
+    for(const h of hits){
+      const e=h.e;
+      if(h.r)await notifShow('Ergebnis · '+h.name,`${e.home} ${e.hs}:${e.as} ${e.away}`,'r'+e.id);
+      else await notifShow('Neues Spiel · '+h.name,`${e.home} – ${e.away}, ${e.d?fmtDay.format(e.d)+(e.hasTime?' '+fmtTime.format(e.d):''):''}`,'n'+e.id);
+    }
+  }catch(e){}finally{NOTE.busy=false}
+}
 /* ---------- Start & automatische Aktualisierung ---------- */
 if(S.club)regClub(S.club);S.favs.filter(f=>f.t==='club').forEach(regClub);
 buildRail();
@@ -1513,6 +1585,9 @@ setInterval(()=>{
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-(net.okAt||0)>60000)refresh(true)});
 window.addEventListener('online',()=>refresh(true));
 setInterval(updateChip,30000);
+setInterval(()=>notifCheck(),60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')notifCheck()});
+setTimeout(()=>notifCheck(),6000);
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)&&location.hostname!=='localhost'){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
