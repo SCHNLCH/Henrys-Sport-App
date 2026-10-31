@@ -388,8 +388,13 @@ const resetBtn=(label,act)=>`<button class="reset" data-act="${act}"><i></i>${la
 
 /* ---------- Zustand ---------- */
 const LS='henry-app-v1';
-const defaults=()=>({tab:'liga',sports:['football','handball'],leagues:['4331','4533'],country:null,favs:[],tableLeague:'4331',tableView:'table',clubView:'squad',club:null,demo:false,keys:{fd:'',ah:''}});
-function loadState(){try{return {...defaults(),...JSON.parse(localStorage.getItem(LS)||'{}')}}catch(e){return defaults()}}
+const defaults=()=>({tab:'liga',sports:['football','handball','american'],leagues:['4331','4533','4391'],country:null,favs:[],tableLeague:'4331',tableView:'table',clubView:'squad',club:null,demo:false,keys:{fd:'',ah:''}});
+function loadState(){try{
+  const s={...defaults(),...JSON.parse(localStorage.getItem(LS)||'{}')};
+  /* Einmalig: American Football und NFL bei bestehenden Nutzern einschalten */
+  if(!s.mig2){s.mig2=1;if(!s.sports.includes('american'))s.sports=s.sports.concat('american');if(!s.leagues.includes('4391'))s.leagues=s.leagues.concat('4391')}
+  return s;
+}catch(e){return defaults()}}
 let S=loadState();
 function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
 const ui={q:{liga:'',verein:'',tabelle:''},sheet:null,tok:0,dirty:false,lastTab:null,reload:null,undo:null};
@@ -691,6 +696,23 @@ async function ssMatches(lid){
   const seen={};
   return ms.filter(m=>!seen[m.id]&&(seen[m.id]=1));
 }
+/* Vereine eines Sportschau-Wettbewerbs: alle Teams aus Vor-, aktuellem und nächstem Spieltag */
+async function ssClubs(lid){
+  const ms=await ssMatches(lid),m={};
+  ms.forEach(x=>{[[x.hid,x.hn,x.hb],[x.aid,x.an,x.ab]].forEach(([id,n,b])=>{if(id&&n&&!m[id])m[id]={idTeam:id,strTeam:n,strBadge:b||''}})});
+  return Object.values(m);
+}
+/* Feste Vereinsliste der NFL (die Quelle für Tabellen liefert sie nicht zuverlässig) */
+const NFL_CLUBS=['Arizona Cardinals','Atlanta Falcons','Baltimore Ravens','Buffalo Bills','Carolina Panthers','Chicago Bears','Cincinnati Bengals','Cleveland Browns','Dallas Cowboys','Denver Broncos','Detroit Lions','Green Bay Packers','Houston Texans','Indianapolis Colts','Jacksonville Jaguars','Kansas City Chiefs','Las Vegas Raiders','Los Angeles Chargers','Los Angeles Rams','Miami Dolphins','Minnesota Vikings','New England Patriots','New Orleans Saints','New York Giants','New York Jets','Philadelphia Eagles','Pittsburgh Steelers','San Francisco 49ers','Seattle Seahawks','Tampa Bay Buccaneers','Tennessee Titans','Washington Commanders'];
+const staticClubs=lid=>lid==='4391'?NFL_CLUBS.map(n=>({idTeam:'st:nfl:'+norm(n),strTeam:n,strBadge:''})):[];
+/* Vereine einer Liga: erst Sportschau, dann Tabelle, zuletzt feste Liste */
+async function leagueClubs(l){
+  let rows=[];
+  if(SS[l.id]){try{rows=await ssClubs(l.id)}catch(e){}}
+  if(!rows.length){try{rows=await getTable(l.id,l.sport)}catch(e){}}
+  if(!rows.length)rows=staticClubs(l.id);
+  return rows;
+}
 async function getTable(lid,sport){
   if(OL[lid]){try{if(await olUsable(lid)){const t=await olTable(lid);if(t.length)return t}}catch(e){}}
   if(extFor(lid)){try{const t=await extTable(lid);if(t.length)return t}catch(e){}}
@@ -729,7 +751,13 @@ async function getClubEvents(c,kind){
       return olPick(mine,kind==='last'?'past':'next',5,c.lid).map(nev);
     }catch(e){return []}
   }
-  if(/^ol:/.test(String(c.id))||c.lid==='bl2')return [];
+  if(/^st:/.test(String(c.id))){
+    try{
+      const nm=norm(c.name),ev=await getLeagueEvents(c.lid,kind==='last'?'past':'next');
+      return ev.filter(e=>norm(e.home)===nm||norm(e.away)===nm);
+    }catch(e){return []}
+  }
+  if(/^(ol|ss):/.test(String(c.id))||c.lid==='bl2')return [];
   return getTeamEvents(c.id,kind);
 }
 async function getPlayers(tid){
@@ -999,13 +1027,19 @@ async function pageVerein(box,tok){
     let clubs=[],note='';
     try{
       if(qraw.length>=3){
-        const res=await searchTeams(qraw);
-        clubs=res.filter(t=>sportOf(t.strSport)&&S.sports.includes(sportOf(t.strSport))).map(t=>regClub({t:'club',id:t.idTeam,name:t.strTeam,badge:t.strBadge,lid:String(t.idLeague||''),sport:sportOf(t.strSport),league:t.strLeague||''}));
+        const qn=norm(qraw);
+        const loc=[],seenN={};
+        for(const l of ls){
+          (await leagueClubs(l)).forEach(r=>{const k=l.sport+norm(r.strTeam);if(norm(r.strTeam).includes(qn)&&!seenN[k]){seenN[k]=1;loc.push(regClub({t:'club',id:r.idTeam,name:r.strTeam,badge:r.strBadge,lid:l.id,sport:l.sport,league:l.short}))}});
+        }
+        let res=[];try{res=await searchTeams(qraw)}catch(e){}
+        const web=res.filter(t=>sportOf(t.strSport)&&S.sports.includes(sportOf(t.strSport))&&!seenN[sportOf(t.strSport)+norm(t.strTeam)]).map(t=>regClub({t:'club',id:t.idTeam,name:t.strTeam,badge:t.strBadge,lid:String(t.idLeague||''),sport:sportOf(t.strSport),league:t.strLeague||''}));
+        clubs=loc.concat(web);
         note=clubs.length?'':emptyBox('🔎','Keinen Verein gefunden.');
       }else if(!ls.length){
         el.innerHTML=emptyBox('🏟️',noLeagueMsg(),`<button class="btn" data-act="nav" data-id="liga">Ligen ansehen</button>`);return;
       }else{
-        const tabs=await Promise.all(ls.map(async l=>({l,rows:await getTable(l.id,l.sport)})));
+        const tabs=await Promise.all(ls.map(async l=>({l,rows:await leagueClubs(l)})));
         tabs.forEach(({l,rows})=>rows.forEach(r=>clubs.push(regClub({t:'club',id:r.idTeam,name:r.strTeam,badge:r.strBadge,lid:l.id,sport:l.sport,league:l.short}))));
         const q=norm(qraw);if(q)clubs=clubs.filter(c=>norm(c.name).includes(q));
         clubs.sort((a,b)=>a.name.localeCompare(b.name,'de'));
