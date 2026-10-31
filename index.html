@@ -260,6 +260,28 @@ body{background:radial-gradient(120% 90% at 50% 20%,#14305a 0%,#050d1c 72%)}
 .rail button[data-id]{--c:#8fb4ff}
 .rail button.on{background:linear-gradient(135deg,rgba(59,140,240,.4),rgba(124,196,255,.2));box-shadow:0 0 14px rgba(90,160,255,.45)}
 .rail button[data-id].on{--c:#e6f4ff}
+
+/* ===== Farbabstufung von Reiter zu Reiter: Indigo-Blau bis Aqua ===== */
+.device[data-tab=statistik]{--t0:#0b1b5a;--t1:#1a38a0;--acc:#3f5cf0;--acc2:#8aa2ff;--acc-soft:rgba(63,92,240,.2)}
+.device[data-tab=sportart]{--t0:#0b2160;--t1:#1a47ae;--acc:#3a6ff0;--acc2:#86aaff;--acc-soft:rgba(58,111,240,.2)}
+.device[data-tab=land]{--t0:#0c2766;--t1:#1b57b8;--acc:#3585ee;--acc2:#84bdff;--acc-soft:rgba(53,133,238,.2)}
+.device[data-tab=verein]{--t0:#0d2d66;--t1:#1c64bd;--acc:#3098ec;--acc2:#86cfff;--acc-soft:rgba(48,152,236,.2)}
+.device[data-tab=tabelle]{--t0:#0e3366;--t1:#1c72bf;--acc:#2aabe8;--acc2:#84dcff;--acc-soft:rgba(42,171,232,.2)}
+.device[data-tab=favoriten]{--t0:#0e3a66;--t1:#1c80be;--acc:#26bde2;--acc2:#86e8ff;--acc-soft:rgba(38,189,226,.2)}
+.device[data-tab=liga]{--t0:#0e4166;--t1:#1c8fbc;--acc:#22cfd8;--acc2:#8af5f2;--acc-soft:rgba(34,207,216,.2)}
+.topbar{background:linear-gradient(135deg,var(--t0) 0%,var(--t1) 58%,var(--acc) 100%);transition:background .3s}
+.cp.on,.btn,.ddbtn{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.seg button.on{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.chk.on{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:var(--acc2)}
+.reset,.pts,.sc,.dd select{color:var(--acc2)}
+.ev .evd,.gh small,.grp,.filter a{color:var(--acc2)}
+.rail button[data-id=statistik]{--c:#8aa2ff}
+.rail button[data-id=sportart]{--c:#86aaff}
+.rail button[data-id=land]{--c:#84bdff}
+.rail button[data-id=verein]{--c:#86cfff}
+.rail button[data-id=tabelle]{--c:#84dcff}
+.rail button[data-id=favoriten]{--c:#86e8ff}
+.rail button[data-id=liga]{--c:#8af5f2}
 </style>
 </head>
 <body>
